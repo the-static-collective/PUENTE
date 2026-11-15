@@ -126,6 +126,7 @@ async function createRoom() {
     const lang=$('teacherLanguage').value;
     const code=useLive?await callRpc('puente_create_room',{p_language:lang}):demo.create(lang);
     session={code,role:'teacher',alias:''};snapshot=null;
+    sessionStorage.setItem('puente.session',JSON.stringify(session));
     $('createPanel').hidden=true;$('teacherRoom').hidden=false;
     $('teacherCode').textContent=code;
     notice('');
@@ -144,6 +145,7 @@ async function joinRoom(e) {
   try {
     if(useLive)await callRpc('puente_join_room',{p_code:code,p_alias:alias});else demo.join(code,alias);
     session={code,role:'student',alias};snapshot=null;
+    sessionStorage.setItem('puente.session',JSON.stringify(session));
     $('joinForm').hidden=true;$('studentRoom').hidden=false;
     notice('');
     await refresh();beginPolling();
@@ -162,7 +164,7 @@ async function answer(choice) {
   catch(err){notice(err.message,true);}finally{busy=false;}
 }
 async function refresh() {
-  if(!session.code||busy && !snapshot)return;
+  if(!session.code)return;
   try{
     const snap=useLive?await callRpc('puente_room_snapshot',{p_code:session.code}):demo.snapshot(session.code,session.role,session.alias);
     if(!snap)return;
@@ -218,7 +220,7 @@ function renderStudent(s) {
   buildChoices($('studentChoices'),q?.choices,s.status==='question'&&s.my_choice===null?answer:null,s.my_choice,s.status==='reveal'?q.correct_choice:null,s.status!=='question'||s.my_choice!==null);
 }
 function resetSession(){
-  stopPolling();session={code:'',role:'',alias:''};snapshot=null;
+  stopPolling();sessionStorage.removeItem('puente.session');session={code:'',role:'',alias:''};snapshot=null;
   $('createPanel').hidden=false;$('teacherRoom').hidden=true;
   $('joinForm').hidden=false;$('studentRoom').hidden=true;
   document.querySelectorAll('.plank').forEach(p=>p.classList.remove('built'));
@@ -272,6 +274,16 @@ function init(){
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
   else if(url.searchParams.has('homework'))showScreen('practice');
   renderPractice();
-  connect();
+  connect().then(async()=>{
+    try {
+      const saved=JSON.parse(sessionStorage.getItem('puente.session')||'null');
+      if(saved&&saved.code&&['teacher','student'].includes(saved.role)){
+        session=saved;
+        if(saved.role==='teacher'){$('createPanel').hidden=true;$('teacherRoom').hidden=false;showScreen('teacher');}
+        else {$('joinForm').hidden=true;$('studentRoom').hidden=false;showScreen('student');}
+        await refresh();if(session.code)beginPolling();
+      }
+    }catch{sessionStorage.removeItem('puente.session');}
+  });
 }
 init();
