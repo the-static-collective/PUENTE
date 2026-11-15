@@ -5,7 +5,8 @@ Chapter 001: The Broken Bridge / El Puente Roto
 A bilingual, cooperative classroom game for phones. Teachers host a room; learners join with a classroom code; a correct class answer earns each plank of the bridge. If nobody gets a round right, the class discusses and retries.
 
 **Repository:** https://github.com/the-static-collective/PUENTE  
-**Expected website:** https://the-static-collective.github.io/PUENTE/
+**Intended website:** https://puente.abundent.org/
+**GitHub Pages fallback:** https://the-static-collective.github.io/PUENTE/
 
 ## Playable features
 
@@ -18,12 +19,15 @@ A bilingual, cooperative classroom game for phones. Teachers host a room; learne
 
 **Important:** This site launches in LOCAL DEMO mode. Demo rooms use local browser storage and therefore do **not** connect different phones. For a real multi-device classroom, configure Supabase as described below.
 
-## Publish the website
+## Publish the website at puente.abundent.org
 
-1. Open repository Settings → Pages and choose GitHub Actions as the build/deploy source.
-2. Open repository Actions and inspect the workflow named Publish PUENTE to GitHub Pages. It triggers on pushes to main; use Run workflow if needed.
-3. Open https://the-static-collective.github.io/PUENTE/ and look for LOCAL DEMO.
-4. On the teacher screen, create a room, start the adventure, press Send demo answer on each round, and reveal answers. Open the Student portal in another tab in the **same browser** to join it.
+The live Cloudflare DNS record for abundent.org is already in place: **CNAME puente → the-static-collective.github.io (DNS only, not proxied)**. Porkbun delegates abundent.org to Cloudflare, so DNS changes must be made in the Cloudflare zone, not the dormant Porkbun zone. No nameserver changes are necessary.
+
+1. Open repository Settings → Pages and choose **GitHub Actions** as the build/deploy source.
+2. Under **Custom domain**, enter **puente.abundent.org** and click **Save**. This is required even though DNS points to GitHub. **Do not skip this: adding a CNAME file to the repository does not configure a custom domain for Pages Actions deployments.**
+3. Open repository Actions and inspect the workflow named Publish PUENTE to GitHub Pages. It triggers on pushes to main; use Run workflow if needed.
+4. Open https://puente.abundent.org/ and look for LOCAL DEMO. Enable **Enforce HTTPS** in Pages when GitHub has provisioned the certificate.
+5. On the teacher screen, create a room, start the adventure, press Send demo answer on each round, and reveal answers. Open the Student portal in another tab in the **same browser** to join it.
 
 No build tools or subscription are required to serve the site from GitHub Pages.
 
