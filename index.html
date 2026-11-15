@@ -44,6 +44,7 @@
         <button class="mode active" type="button" data-screen="teacher" aria-pressed="true">01 / Teacher's desk</button>
         <button class="mode" type="button" data-screen="student" aria-pressed="false">02 / Student portal</button>
         <button class="mode" type="button" data-screen="practice" aria-pressed="false">03 / Homework quest</button>
+        <button class="mode" type="button" data-screen="garden" aria-pressed="false">04 / Quest Garden</button>
       </nav>
 
       <div class="workspace">
@@ -88,6 +89,12 @@
                 <p class="privacy-note">Only classroom aliases and game scores appear here. Please use fictional nicknames.</p>
               </aside>
             </div>
+
+            <div id="classGrowth" class="growth-card" hidden>
+              <div><p class="eyebrow">AFTER THE ADVENTURE</p><h3>This class planted a new quest.</h3>
+                <p id="growthReceipt" class="help">A new draft awaits teacher review. Only round-level totals—not student identities—are used.</p></div>
+              <button id="viewGrowth" class="btn outlined" type="button">Review next adventure →</button>
+            </div>
             <button type="button" id="leaveTeacher" class="text-button">← Leave teacher's desk</button>
           </div>
         </section>
@@ -113,12 +120,74 @@
           <div class="panel practice-panel">
             <div class="field-grid"><label>Practice language<select id="practiceLanguage"><option value="es">Spanish / Español</option><option value="en">English / Inglés</option></select></label><div><div id="practiceCounter" class="eyebrow">QUEST 1 / 5</div><div id="practiceScore" class="mini-stat">0 correct</div></div></div>
             <div class="progress-track"><div id="practiceProgress" class="progress-fill"></div></div>
+            <div id="practiceStory" class="help">The clockmaker's notes</div>
             <h3 id="practicePrompt">Loading the clockmaker's notes…</h3>
             <div id="practiceChoices" class="choices"></div>
             <div id="practiceFeedback" class="feedback" aria-live="polite"></div>
             <button id="practiceNext" type="button" class="btn primary" hidden>Next puzzle →</button>
             <button id="practiceRestart" type="button" class="btn outlined" hidden>Try another run</button>
           </div>
+        </section>
+
+        <section id="gardenScreen" class="screen" hidden aria-labelledby="gardenHeading">
+          <div class="section-heading"><div><p class="eyebrow">A GAME THAT GROWS WHEN PLAYED</p><h2 id="gardenHeading">The Quest Garden</h2></div>
+            <p class="section-aside">Play → notice a gap → grow a draft → review → approve → play again.</p></div>
+          <div class="garden-overview"><span id="gardenCounts" class="garden-counts">0 approved · 0 drafts</span>
+            <span class="help">Teacher-reviewed packs stay in this browser until exported or deleted.</span></div>
+          <div class="game-grid">
+            <section class="panel" aria-labelledby="growHeading">
+              <div class="panel-top"><span class="eyebrow">01 / GROW SOMETHING</span><span class="mini-stat">New combinations from an authored phrase bank</span></div>
+              <h3 id="growHeading">Plant another adventure</h3>
+              <div class="field-grid">
+                <label>Learning language<select id="gardenLanguage"><option value="es">Spanish / Español</option><option value="en">English / Inglés</option></select></label>
+                <label>Story world<select id="gardenWorld">
+                  <option value="village">Village of Two Tongues</option><option value="market">Midnight Marketplace</option>
+                  <option value="signal">Signal Station</option><option value="clock">Clockmaker's Library</option>
+                  <option value="mystery">Missing Words Mystery</option>
+                </select></label>
+                <label>Practice focus<select id="gardenFocus">
+                  <option value="mixed">A little of everything</option><option value="direction">Directions</option>
+                  <option value="greeting">Greetings</option><option value="market">Shopping and requests</option>
+                  <option value="time">Time and verbs</option><option value="objects">Objects and descriptions</option>
+                  <option value="conversation">Everyday conversation</option>
+                </select></label>
+              </div>
+              <button type="button" id="gardenGrow" class="btn primary">Grow a draft quest →</button>
+              <p class="help">No AI token or student data needed. This version recombines vetted, human-authored questions; it does not autonomously invent new facts.</p>
+            </section>
+            <section class="panel" aria-labelledby="importHeading">
+              <div class="panel-top"><span class="eyebrow">02 / ASK YOUR CHATGPT</span><span class="mini-stat">Optional creative expansion</span></div>
+              <h3 id="importHeading">New words, new worlds</h3>
+              <p class="help">Copy a prompt into ChatGPT, review its proposed adventure, and paste the JSON here. Nothing is published without approval.</p>
+              <div class="action-row"><button type="button" id="gardenCopyPrompt" class="btn outlined small">Copy ChatGPT prompt</button></div>
+              <label class="top-gap">Paste an adventure JSON<textarea id="gardenPaste" rows="6" maxlength="24000" placeholder='{"schema":"puente.questpack/v1", ...}'></textarea></label>
+              <button type="button" id="gardenImport" class="btn outlined">Validate & save as draft →</button>
+            </section>
+          </div>
+          <div class="garden-shelves">
+            <section class="panel" aria-labelledby="draftHeading">
+              <div class="panel-top"><span class="eyebrow">03 / TEACHER REVIEW</span><span class="pill">HELD · NOT PUBLISHED</span></div>
+              <h3 id="draftHeading">New seeds</h3>
+              <div id="gardenDraftList" class="garden-list" aria-live="polite"></div>
+            </section>
+            <section class="panel" aria-labelledby="approvedHeading">
+              <div class="panel-top"><span class="eyebrow">04 / READY TO PLAY</span><span class="pill">TEACHER APPROVED</span></div>
+              <h3 id="approvedHeading">The game shelf</h3>
+              <div id="gardenApprovedList" class="garden-list" aria-live="polite"></div>
+            </section>
+          </div>
+          <div id="gardenReview" class="panel garden-review" hidden>
+            <div class="panel-top"><span class="eyebrow">INSPECT THE WHOLE QUEST</span><button id="gardenCloseReview" class="text-button" type="button">Close</button></div>
+            <h3 id="gardenReviewTitle">Draft title</h3>
+            <p id="gardenReviewIntro"></p><p id="gardenReviewProvenance" class="help"></p>
+            <div id="gardenQuestionReview" class="garden-questions"></div>
+            <label class="top-gap">Edit this draft as JSON (optional)
+              <textarea id="gardenEditJson" rows="10" maxlength="24000" spellcheck="false"></textarea></label>
+            <div class="action-row"><button type="button" id="gardenSaveEdit" class="btn outlined">Save edits & validate</button>
+              <button type="button" id="gardenApprove" class="btn primary">Approve for classroom →</button>
+              <button type="button" id="gardenDiscard" class="btn outlined">Discard draft</button></div>
+          </div>
+          <p class="privacy-note">PUENTE keeps generated drafts and reviews in teacher-side browser storage only. Classroom feedback is summarized per challenge, never by student. MOTIF's Two Doors and reasoning-spine work inspired the bounded inquiry cycle; the native MOTIF solver is not connected or executing here.</p>
         </section>
       </div>
       <p id="appNotice" class="notice" role="status" aria-live="polite"></p>
@@ -127,6 +196,7 @@
     <footer><span>PUENTE / OPEN CLASSROOM EXPERIMENT</span><span>Language builds bridges. People finish them.</span></footer>
   </div>
   <script src="./config.js"></script>
+  <script src="./garden.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
