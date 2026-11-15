@@ -127,7 +127,7 @@ async function createRoom() {
   try {
     const pack=gardenUI.selectedPack();
     const lang=pack?pack.language:$('teacherLanguage').value;
-    const code=useLive?await callRpc('puente_create_room',{p_language:lang,p_pack:pack}):demo.create(lang,pack);
+    const code=useLive?await callRpc('puente_create_room',pack?{p_language:lang,p_pack:pack}:{p_language:lang}):demo.create(lang,pack);
     session={code,role:'teacher',alias:''};snapshot=null;
     sessionStorage.setItem('puente.session',JSON.stringify(session));
     $('createPanel').hidden=true;$('teacherRoom').hidden=false;
