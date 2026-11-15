@@ -2,6 +2,7 @@
 // Fictional aliases only. Local demo is same-device only, never cross-phone.
 const $ = (id) => document.getElementById(id);
 const config = window.PUENTE_CONFIG || {};
+const gardenUI = window.PuenteGardenUI;
 const languages = {
   es: [
     {prompt:'A sign reads “La biblioteca está cerca del parque.” Where is the library?', choices:['Near the park','Behind the school','Across the river'], correct:0, explanation:'“Cerca de” means “near.” The library is near the park.'},
@@ -30,7 +31,7 @@ let practice = {language:'es',index:0,score:0,answered:false};
 const normalizeCode = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
 const notice = (msg, error=false) => {const n=$('appNotice'); n.textContent=msg;n.classList.toggle('error',error);};
 function showScreen(name) {
-  for(const id of ['teacher','student','practice']) $(id+'Screen').hidden = (id!==name);
+  for(const id of ['teacher','student','practice','garden']) $(id+'Screen').hidden = (id!==name);
   document.querySelectorAll('.mode').forEach(b=>{const active=b.dataset.screen===name;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
   if(name==='practice') renderPractice();
   const section=$(name+'Screen');
@@ -51,9 +52,9 @@ function buildChoices(element, choices, onSelect, selected=null, correct=null, l
 function readDemo(code){try{return JSON.parse(localStorage.getItem('puente.room.'+code)||'null');}catch{return null;}}
 function writeDemo(room){localStorage.setItem('puente.room.'+room.code,JSON.stringify(room));}
 const demo = {
-  create(language) {
+  create(language,pack=null) {
     const code='D'+crypto.getRandomValues(new Uint32Array(1))[0].toString(16).toUpperCase().padStart(8,'0').slice(0,7);
-    const room={code,language,status:'lobby',step:0,players:[],submissions:[],created:Date.now()};
+    const room={code,language,pack:pack?window.PuenteGarden.validate(pack):null,status:'lobby',step:0,players:[],submissions:[],created:Date.now()};
     writeDemo(room);return code;
   },
   join(code,alias) {
@@ -68,7 +69,7 @@ const demo = {
     const r=readDemo(code);if(!r) throw Error('Room not found.');
     if(r.status==='lobby'){r.status='question';r.step=1;}
     else if(r.status==='question')r.status='reveal';
-    else if(r.status==='reveal'){const solved=r.submissions.some(s=>s.step===r.step&&s.correct);if(!solved){r.submissions=r.submissions.filter(s=>s.step!==r.step);r.status='question';}else if(r.step>=6)r.status='finished';else{r.step++;r.status='question';}}
+    else if(r.status==='reveal'){const solved=r.submissions.some(s=>s.step===r.step&&s.correct);const total=r.pack?r.pack.questions.length:6;if(!solved){r.submissions=r.submissions.filter(s=>s.step!==r.step);r.status='question';}else if(r.step>=total)r.status='finished';else{r.step++;r.status='question';}}
     writeDemo(r);
   },
   answer(code,alias,choice) {
@@ -76,24 +77,25 @@ const demo = {
     if(!r.players.includes(alias))throw Error('Join the room first.');
     const existing=r.submissions.find(s=>s.step===r.step&&s.alias===alias);
     if(existing)return {accepted:false};
-    r.submissions.push({step:r.step,alias,choice,correct:choice===languages[r.language][r.step-1].correct});
+    const q=r.pack?r.pack.questions[r.step-1]:languages[r.language][r.step-1];
+    r.submissions.push({step:r.step,alias,choice,correct:choice===q.correct});
     writeDemo(r);return {accepted:true};
   },
   snapshot(code,role,alias) {
     const r=readDemo(code);if(!r)throw Error('Room not found.');
     if(Date.now()-r.created>12*3600*1000)throw Error('Room has expired.');
     if(role==='student'&&!r.players.includes(alias))throw Error('Not joined.');
-    const q=r.step>0?languages[r.language][r.step-1]:null;
+    const q=r.step>0?(r.pack?r.pack.questions[r.step-1]:languages[r.language][r.step-1]):null;
     const answers=r.submissions.filter(s=>s.step===r.step);
     const mine=answers.find(s=>s.alias===alias);
-    return {code:r.code,language:r.language,status:r.status,step:r.step,total:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
+    return {code:r.code,language:r.language,pack_title:r.pack?r.pack.title:'The Broken Bridge',status:r.status,step:r.step,total:r.pack?r.pack.questions.length:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,topic:q.topic||'mixed',mechanic:q.mechanic||'decode',correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
   },
   simulate(code) {
     const r=readDemo(code);if(!r) return;
     const aliases=['Blue Fox','Paper Kite','Golden Otter','Moon Lantern','Moss Rabbit'];
     let alias=r.players.find(a=>!r.submissions.some(s=>s.step===r.step&&s.alias===a));
     if(!alias){alias=aliases.find(a=>!r.players.includes(a));if(!alias)return;r.players.push(alias);}
-    if(r.status==='question'&&!r.submissions.some(s=>s.step===r.step&&s.alias===alias))r.submissions.push({step:r.step,alias,choice:languages[r.language][r.step-1].correct,correct:true});
+    if(r.status==='question'&&!r.submissions.some(s=>s.step===r.step&&s.alias===alias))r.submissions.push({step:r.step,alias,choice:(r.pack?r.pack.questions[r.step-1]:languages[r.language][r.step-1]).correct,correct:true});
     writeDemo(r);
   }
 };
@@ -123,8 +125,9 @@ async function callRpc(name,params) {
 async function createRoom() {
   if(busy)return;busy=true;$('createRoom').disabled=true;
   try {
-    const lang=$('teacherLanguage').value;
-    const code=useLive?await callRpc('puente_create_room',{p_language:lang}):demo.create(lang);
+    const pack=gardenUI.selectedPack();
+    const lang=pack?pack.language:$('teacherLanguage').value;
+    const code=useLive?await callRpc('puente_create_room',{p_language:lang,p_pack:pack}):demo.create(lang,pack);
     session={code,role:'teacher',alias:''};snapshot=null;
     sessionStorage.setItem('puente.session',JSON.stringify(session));
     $('createPanel').hidden=true;$('teacherRoom').hidden=false;
@@ -169,7 +172,7 @@ async function refresh() {
     const snap=useLive?await callRpc('puente_room_snapshot',{p_code:session.code}):demo.snapshot(session.code,session.role,session.alias);
     if(!snap)return;
     snapshot=snap;
-    if(session.role==='teacher')renderTeacher(snap);
+    if(session.role==='teacher'){renderTeacher(snap);gardenUI.track(snap,'teacher');}
     else renderStudent(snap);
     updateBridge(snap);
   }catch(err){notice('Could not refresh the room: '+err.message,true);stopPolling();}
@@ -182,6 +185,7 @@ function updateBridge(s) {
 }
 function renderTeacher(s) {
   $('teacherCode').textContent=s.code;
+  $('classGrowth').hidden=s.status!=='finished';
   $('roomState').textContent=({lobby:'WAITING FOR CLASS',question:'CHALLENGE LIVE',reveal:'ANSWER REVEALED',finished:'BRIDGE RESTORED'})[s.status]||s.status;
   $('playerCount').textContent=s.players.length+' explorer'+(s.players.length===1?'':'s');
   $('responseCount').textContent=s.responses+' / '+s.players.length+' responses';
@@ -227,7 +231,9 @@ function resetSession(){
   notice('');
 }
 function renderPractice(){
-  const bank=languages[practice.language];const done=practice.index>=5;
+  const custom=gardenUI.practicePack();const bank=custom&&custom.language===practice.language?custom.questions:languages[practice.language];
+  $('practiceStory').textContent=custom&&custom.language===practice.language?custom.title+' — '+custom.intro:"The clockmaker's notes — independent practice";
+  const done=practice.index>=5;
   $('practiceCounter').textContent=done?'QUEST COMPLETE':'QUEST '+(practice.index+1)+' / 5';
   $('practiceScore').textContent=practice.score+' correct';
   $('practiceProgress').style.width=(100*Math.min(5,practice.index+(practice.answered?1:0))/5)+'%';
@@ -240,7 +246,8 @@ function renderPractice(){
 }
 function choosePractice(i){
   if(practice.answered)return;
-  const q=languages[practice.language][practice.index];
+  const custom=gardenUI.practicePack();const bank=custom&&custom.language===practice.language?custom.questions:languages[practice.language];
+  const q=bank[practice.index];
   practice.answered=true;if(i===q.correct)practice.score++;
   $('practiceFeedback').textContent=(i===q.correct?'Correct. ':'Not quite. ')+q.explanation;
   $('practiceFeedback').className='feedback '+(i===q.correct?'':'error');
@@ -255,6 +262,7 @@ async function copyJoin(){
   catch{notice('Join link: '+url.href);}
 }
 function init(){
+  gardenUI.init();
   document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
   $('goTeacher').addEventListener('click',()=>showScreen('teacher'));
   $('goStudent').addEventListener('click',()=>showScreen('student'));
@@ -272,7 +280,8 @@ function init(){
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session.code)refresh();});
   const url=new URL(location.href),join=url.searchParams.get('join');
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
-  else if(url.searchParams.has('homework'))showScreen('practice');
+  else if(url.searchParams.has('homework')||url.searchParams.has('practicePack'))showScreen('practice');
+  practice.language=$('practiceLanguage').value;
   renderPractice();
   connect().then(async()=>{
     try {
