@@ -88,7 +88,7 @@ const demo = {
     const q=r.step>0?(r.pack?r.pack.questions[r.step-1]:languages[r.language][r.step-1]):null;
     const answers=r.submissions.filter(s=>s.step===r.step);
     const mine=answers.find(s=>s.alias===alias);
-    return {code:r.code,language:r.language,pack_title:r.pack?r.pack.title:'The Broken Bridge',status:r.status,step:r.step,total:r.pack?r.pack.questions.length:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,topic:q.topic||'mixed',mechanic:q.mechanic||'decode',correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
+    return {code:r.code,language:r.language,pack_title:r.pack?r.pack.title:'The Broken Bridge',status:r.status,step:r.step,total:r.pack?r.pack.questions.length:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,topic:q.topic||(['direction','greeting','market','time','conversation','conversation'][r.step-1]||'mixed'),mechanic:q.mechanic||'decode',correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
   },
   simulate(code) {
     const r=readDemo(code);if(!r) return;
