@@ -2,6 +2,23 @@
 
 Chapter 001: The Broken Bridge / El Puente Roto
 
+## NEW · Quest Garden v1 (MOTIF-inspired)
+
+**Play → Observe class-level results → Generate a candidate → Teacher review → Approve → Replay → Repeat.** Every completed teacher-led classroom session automatically drafts a new **six-challenge** adventure in the teacher's browser. It observes only counts per round and the challenge topic, not student names or individual answers. If too few responses exist, the candidate is explicitly marked exploratory.
+
+Open **04 / Quest Garden** to:
+
+- Generate additional themed quest packs in five worlds using the human-authored 18-question bank in each direction (Spanish/English). These are **bounded recombinations**, not an AI inventing facts or a claim of infinite original questions.
+- Inspect all six questions, answers and explanations, edit draft JSON, reject poor drafts, and **approve** a quest before classroom use.
+- Import a new six-question quest drafted with your own ChatGPT using **Copy ChatGPT prompt** and the JSON import field, or export a pack to use elsewhere.
+- Replay approved local packs from Teacher's Desk, and copy a **self-contained homework link** that works across devices with no login or backend. Links contain the whole practice pack and answers, so they are **for practice, not secure testing or grading**.
+- After a room finishes, review the teacher-side auto-generated draft. A source/evidence note identifies whether it used genuine aggregated round evidence or simply exploration.
+
+**Storage boundary:** Quest packs and derived drafts are held in the **current teacher browser only**, unless exported or shared by the teacher. There is no cross-teacher catalog, autonomously publishing new games, or server-side generative AI. A cleared browser can lose its packs. Export drafts and approved packs you want to preserve. The MOTIF native solver is not executing; source-pinned research inspired our design choices. See [the growth reasoning receipt](docs/GROWTH-LOOP.md).
+
+**For multiplayer use of approved custom packs:** after deploying [the base Supabase schema](supabase/schema.sql), the same dedicated project must also apply [the Quest Garden upgrade](supabase/garden-v2.sql). Before applying that migration, ordinary built-in rooms still work on live mode, but custom packs require the upgrade. Existing shared projects are not an acceptable shortcut.
+
+
 A bilingual, cooperative classroom game for phones. Teachers host a room; learners join with a classroom code; a correct class answer earns each plank of the bridge. If nobody gets a round right, the class discusses and retries.
 
 **Repository:** https://github.com/the-static-collective/PUENTE  
@@ -13,8 +30,9 @@ A bilingual, cooperative classroom game for phones. Teachers host a room; learne
 - Teacher's desk: create a room, show a code, start the adventure, reveal and explain answers, advance six challenges, see explorer counts/scores.
 - Student portal: join with a fictional alias, answer once per round, see teacher's reveal.
 - A classroom bridge illustration that gradually rebuilds.
-- Homework: five self-paced puzzles with immediate feedback. Homework scores are not stored centrally.
+- Homework: five self-paced puzzles with immediate feedback, including teacher-approved quest packs via shared links. Homework scores are not stored centrally.
 - Switch between Spanish-learning and English-learning.
+- Quest Garden: automatic post-class candidates, five worlds, topic-focused recombination, teacher review and approval, JSON export/import and ChatGPT authoring prompt.
 - Same-device demo: works with no backend, including two tabs on one browser.
 
 **Important:** This site launches in LOCAL DEMO mode. Demo rooms use local browser storage and therefore do **not** connect different phones. For a real multi-device classroom, configure Supabase as described below.
@@ -36,7 +54,7 @@ No build tools or subscription are required to serve the site from GitHub Pages.
 Create a **dedicated Supabase project for PUENTE**. Do not mix children's classroom data into existing unrelated projects.
 
 1. Enable Anonymous Sign-Ins in that project's Authentication provider settings. Review CAPTCHA and rate limits before classroom use.
-2. Review and execute the SQL in [supabase/schema.sql](supabase/schema.sql) in that dedicated project's SQL editor. It creates three locked-down public tables, a private question bank, and five controlled RPC functions.
+2. Review and execute the SQL in [supabase/schema.sql](supabase/schema.sql) in that dedicated project's SQL editor, **then** [supabase/garden-v2.sql](supabase/garden-v2.sql) to enable teacher-approved custom packs. These lock down the public tables, preserve a private answer bank, and authorize narrow RPC functions.
 3. Copy the Supabase **project URL** and the **publishable key** (starts with sb_publishable_). Edit [config.js](config.js) to contain:
 
 ~~~js
@@ -70,7 +88,7 @@ For independent practice, use the Homework Quest tab or link to the website with
 
 > Help me write six cooperative classroom challenges for students aged [AGE] learning [LANGUAGE] at [LEVEL]. Our goal is [OBJECTIVE]. For each challenge, create one practical story situation, three plausible answers with exactly one correct answer, and a short, kind explanation. Avoid trick questions. Return the plan for my approval before publishing it.
 
-The current question set is fixed in both [app.js](app.js) for demo/homework and [supabase/schema.sql](supabase/schema.sql) for live play. Custom teacher-approved JSON quest packs, asymmetric team clues, student roles, and MOTIF-generated lesson hypotheses are **planned, not yet implemented**.
+PUENTE now accepts teacher-approved six-question JSON packs, and classroom completion plants a draft automatically. The current first game remains fixed in [app.js](app.js) and [supabase/schema.sql](supabase/schema.sql); the Quest Garden's other 18 vetted questions per language are in [garden.js](garden.js). Asymmetric team clues, student roles and a connected native MOTIF solver are **not implemented**.
 
 ## Safety and scope
 
@@ -83,8 +101,12 @@ The public app includes no API secrets. Browser users may only reach room operat
 - index.html — teacher, learner and homework screens
 - styles.css — responsive layout and bridge illustration
 - app.js — classroom UI, local demo, backend RPC client, homework
+- garden.js — reviewed source bank, pure recombination, bounded pack schema, local library
+- garden-ui.js — teacher review, publish gate, import/export, practice-link sharing, class-level seed generator
 - config.js — blank public backend config by default
 - supabase/schema.sql — dedicated-classroom backend
+- supabase/garden-v2.sql — secure approved-pack upgrade, when live backend is configured
+- docs/GROWTH-LOOP.md — cross-repo MOTIF inspiration and falsifiable experiment plan
 - .github/workflows/pages.yml — GitHub Pages deployment
 
 The bridge is the classroom's shared achievement; the points are only playful feedback.
