@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b32">
+  <meta name="description" content="PUENTE — a cooperative bilingual classroom adventure. One room, two languages, many minds.">
+  <title>PUENTE • The Broken Bridge</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="PUENTE home"><span class="brand-symbol" aria-hidden="true">≋</span><span><strong>PUENTE</strong><small>THE LIVING CLASSROOM</small></span></a>
+      <div class="header-right"><span class="badge">CHAPTER 001</span><span id="connectionBadge" class="status">LOCAL DEMO</span></div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="headline">
+        <div class="hero-copy">
+          <p class="eyebrow">THE BROKEN BRIDGE · EL PUENTE ROTO</p>
+          <h1 id="headline">A world rebuilt<br><em>one word</em> at a time.</h1>
+          <p class="hero-text">A shared bilingual adventure for real classrooms. Your teacher starts the story. The class solves it together.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="goTeacher" type="button">I'm the teacher <span aria-hidden="true">→</span></button>
+            <button class="btn outlined" id="goStudent" type="button">Join a classroom</button>
+          </div>
+        </div>
+        <div class="landscape" aria-label="Illustration: an unfinished bridge between two green hills">
+          <div class="stars" aria-hidden="true">✳ &nbsp; ✶ &nbsp; ✳</div>
+          <div class="land-title">THE VILLAGE OF TWO TONGUES</div>
+          <div class="moon" aria-hidden="true"></div>
+          <div class="hill hill-left"></div><div class="hill hill-right"></div>
+          <div class="river"></div><div class="pier pier-one"></div><div class="pier pier-two"></div>
+          <div id="bridgePieces" class="bridge-pieces" aria-hidden="true">
+            <div class="plank"></div><div class="plank"></div><div class="plank"></div>
+            <div class="plank"></div><div class="plank"></div><div class="plank"></div>
+          </div>
+          <div class="land-bottom"><span>ORILLA A</span><span>?</span><span>SHORE B</span></div>
+        </div>
+      </section>
+
+      <nav class="mode-nav" aria-label="Ways to play">
+        <button class="mode active" type="button" data-screen="teacher" aria-pressed="true">01 / Teacher's desk</button>
+        <button class="mode" type="button" data-screen="student" aria-pressed="false">02 / Student portal</button>
+        <button class="mode" type="button" data-screen="practice" aria-pressed="false">03 / Homework quest</button>
+      </nav>
+
+      <div class="workspace">
+        <section id="teacherScreen" class="screen" aria-labelledby="teacherHeading">
+          <div class="section-heading"><div><p class="eyebrow">FOR THE GUIDE</p><h2 id="teacherHeading">Teacher's desk</h2></div><p class="section-aside">Create a room, project the bridge, and lead the adventure.</p></div>
+
+          <div id="createPanel" class="panel">
+            <div class="field-grid">
+              <label>Learning language
+                <select id="teacherLanguage"><option value="es">Spanish / Español</option><option value="en">English / Inglés</option></select>
+              </label>
+              <label>Adventure
+                <select id="teacherAdventure"><option value="bridge">The Broken Bridge · 6 challenges</option></select>
+              </label>
+            </div>
+            <p class="help" id="teacherModeHelp">Demo mode works on this device, including multiple tabs. Connect a separate Supabase project for students on different phones.</p>
+            <button class="btn primary" id="createRoom" type="button">Open the classroom →</button>
+          </div>
+
+          <div id="teacherRoom" hidden>
+            <div class="room-banner">
+              <div><span class="eyebrow">ROOM CODE</span><div id="teacherCode" class="room-code">--------</div><p>Students open this website and select “Join a classroom.”</p></div>
+              <div class="room-banner-actions"><span id="roomState" class="pill">WAITING FOR CLASS</span><button type="button" id="copyJoin" class="btn small outlined">Copy join link</button></div>
+            </div>
+            <div class="game-grid">
+              <div class="panel lesson-panel">
+                <div class="panel-top"><span id="roundLabel" class="eyebrow">PROLOGUE</span><span id="responseCount" class="mini-stat">0 responses</span></div>
+                <h3 id="teacherPrompt">The bridge is waiting.</h3>
+                <p id="teacherHint">When the class is ready, start the adventure.</p>
+                <div id="teacherChoices" class="choices preview-choices"></div>
+                <div id="revealBox" class="reveal" hidden></div>
+                <div class="action-row">
+                  <button id="advanceRoom" class="btn primary" type="button">Begin adventure →</button>
+                  <button id="simulatePlayer" class="btn outlined small" type="button">Add demo learner</button>
+                </div>
+              </div>
+              <aside class="panel stats-panel">
+                <div class="panel-top"><span class="eyebrow">THE CLASS</span><span id="playerCount" class="mini-stat">0 explorers</span></div>
+                <div class="progress-track" aria-label="Bridge progress"><div id="classProgress" class="progress-fill"></div></div>
+                <p class="help" id="progressText">0 of 6 bridge pieces restored</p>
+                <ul id="playerList" class="player-list"><li class="empty">No explorers yet. Share the room code.</li></ul>
+                <p class="privacy-note">Only classroom aliases and game scores appear here. Please use fictional nicknames.</p>
+              </aside>
+            </div>
+            <button type="button" id="leaveTeacher" class="text-button">← Leave teacher's desk</button>
+          </div>
+        </section>
+
+        <section id="studentScreen" class="screen" hidden aria-labelledby="studentHeading">
+          <div class="section-heading"><div><p class="eyebrow">FOR THE EXPLORER</p><h2 id="studentHeading">Join the adventure</h2></div><p class="section-aside">No account or real name required.</p></div>
+          <form id="joinForm" class="panel join-panel">
+            <label>Classroom code<input id="joinCode" maxlength="12" autocomplete="off" spellcheck="false" placeholder="A1B2C3D4" required></label>
+            <label>Your explorer alias<input id="joinAlias" maxlength="18" autocomplete="off" placeholder="Blue Fox" required><small>Choose a made-up nickname, not your real name.</small></label>
+            <button class="btn primary" type="submit">Enter the village →</button>
+          </form>
+          <div id="studentRoom" class="panel student-room" hidden>
+            <div class="panel-top"><span id="studentRound" class="eyebrow">WAITING</span><span id="studentStatus" class="pill">CONNECTED</span></div>
+            <h3 id="studentPrompt">Waiting for the teacher to begin…</h3>
+            <div id="studentChoices" class="choices"></div>
+            <div id="studentFeedback" class="feedback" aria-live="polite"></div>
+            <button type="button" id="leaveStudent" class="text-button">← Leave this view</button>
+          </div>
+        </section>
+
+        <section id="practiceScreen" class="screen" hidden aria-labelledby="practiceHeading">
+          <div class="section-heading"><div><p class="eyebrow">AFTER THE BELL</p><h2 id="practiceHeading">The clockmaker's quest</h2></div><p class="section-aside">Five quick puzzles. Self-paced, no sign-in, no scores sent to school.</p></div>
+          <div class="panel practice-panel">
+            <div class="field-grid"><label>Practice language<select id="practiceLanguage"><option value="es">Spanish / Español</option><option value="en">English / Inglés</option></select></label><div><div id="practiceCounter" class="eyebrow">QUEST 1 / 5</div><div id="practiceScore" class="mini-stat">0 correct</div></div></div>
+            <div class="progress-track"><div id="practiceProgress" class="progress-fill"></div></div>
+            <h3 id="practicePrompt">Loading the clockmaker's notes…</h3>
+            <div id="practiceChoices" class="choices"></div>
+            <div id="practiceFeedback" class="feedback" aria-live="polite"></div>
+            <button id="practiceNext" type="button" class="btn primary" hidden>Next puzzle →</button>
+            <button id="practiceRestart" type="button" class="btn outlined" hidden>Try another run</button>
+          </div>
+        </section>
+      </div>
+      <p id="appNotice" class="notice" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer><span>PUENTE / OPEN CLASSROOM EXPERIMENT</span><span>Language builds bridges. People finish them.</span></footer>
+  </div>
+  <script src="./config.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
