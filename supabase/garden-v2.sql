@@ -155,7 +155,7 @@ begin
         'explanation',case when r.status in ('reveal','finished') then j_question->>'explanation' else null end)
       when q.id is null then null
       else jsonb_build_object('prompt',q.prompt,'choices',q.choices,
-        'topic','mixed','mechanic','decode',
+        'topic',case r.step when 1 then 'direction' when 2 then 'greeting' when 3 then 'market' when 4 then 'time' else 'conversation' end,'mechanic','decode',
         'correct_choice',case when r.status in ('reveal','finished') then q.correct_choice else null end,
         'explanation',case when r.status in ('reveal','finished') then q.explanation else null end)
       end
