@@ -2,7 +2,7 @@
 
 Chapter 001: The Broken Bridge / El Puente Roto
 
-A bilingual, cooperative classroom game for phones. Teachers host a room; learners join with a classroom code; every completed challenge restores a plank in the bridge.
+A bilingual, cooperative classroom game for phones. Teachers host a room; learners join with a classroom code; a correct class answer earns each plank of the bridge. If nobody gets a round right, the class discusses and retries.
 
 **Repository:** https://github.com/the-static-collective/PUENTE  
 **Expected website:** https://the-static-collective.github.io/PUENTE/
@@ -23,7 +23,7 @@ A bilingual, cooperative classroom game for phones. Teachers host a room; learne
 1. Open repository Settings → Pages and choose GitHub Actions as the build/deploy source.
 2. Open repository Actions and inspect the workflow named Publish PUENTE to GitHub Pages. It triggers on pushes to main; use Run workflow if needed.
 3. Open https://the-static-collective.github.io/PUENTE/ and look for LOCAL DEMO.
-4. On the teacher screen, create a room, press Add demo learner, start the adventure, and reveal answers. Open the Student portal in another tab in the **same browser** to join it.
+4. On the teacher screen, create a room, start the adventure, press Send demo answer on each round, and reveal answers. Open the Student portal in another tab in the **same browser** to join it.
 
 No build tools or subscription are required to serve the site from GitHub Pages.
 
