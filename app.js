@@ -68,7 +68,7 @@ const demo = {
     const r=readDemo(code);if(!r) throw Error('Room not found.');
     if(r.status==='lobby'){r.status='question';r.step=1;}
     else if(r.status==='question')r.status='reveal';
-    else if(r.status==='reveal'){if(r.step>=6)r.status='finished';else{r.step++;r.status='question';}}
+    else if(r.status==='reveal'){const solved=r.submissions.some(s=>s.step===r.step&&s.correct);if(!solved){r.submissions=r.submissions.filter(s=>s.step!==r.step);r.status='question';}else if(r.step>=6)r.status='finished';else{r.step++;r.status='question';}}
     writeDemo(r);
   },
   answer(code,alias,choice) {
@@ -86,14 +86,14 @@ const demo = {
     const q=r.step>0?languages[r.language][r.step-1]:null;
     const answers=r.submissions.filter(s=>s.step===r.step);
     const mine=answers.find(s=>s.alias===alias);
-    return {code:r.code,language:r.language,status:r.status,step:r.step,total:6,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
+    return {code:r.code,language:r.language,status:r.status,step:r.step,total:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
   },
   simulate(code) {
     const r=readDemo(code);if(!r) return;
     const aliases=['Blue Fox','Paper Kite','Golden Otter','Moon Lantern','Moss Rabbit'];
-    const alias=aliases.find(a=>!r.players.includes(a));if(!alias)return;
-    r.players.push(alias);
-    if(r.status==='question')r.submissions.push({step:r.step,alias,choice:languages[r.language][r.step-1].correct,correct:true});
+    let alias=r.players.find(a=>!r.submissions.some(s=>s.step===r.step&&s.alias===a));
+    if(!alias){alias=aliases.find(a=>!r.players.includes(a));if(!alias)return;r.players.push(alias);}
+    if(r.status==='question'&&!r.submissions.some(s=>s.step===r.step&&s.alias===alias))r.submissions.push({step:r.step,alias,choice:languages[r.language][r.step-1].correct,correct:true});
     writeDemo(r);
   }
 };
@@ -177,7 +177,7 @@ async function refresh() {
 function beginPolling(){stopPolling();timer=setInterval(()=>{if(!document.hidden&&!busy)refresh();},2000);}
 function stopPolling(){if(timer){clearInterval(timer);timer=null;}}
 function updateBridge(s) {
-  const completed=s.status==='finished'?s.total:(s.status==='reveal'?s.step:Math.max(0,s.step-1));
+  const completed=s.cleared||0;
   document.querySelectorAll('.plank').forEach((el,i)=>el.classList.toggle('built',i<completed));
 }
 function renderTeacher(s) {
@@ -185,7 +185,7 @@ function renderTeacher(s) {
   $('roomState').textContent=({lobby:'WAITING FOR CLASS',question:'CHALLENGE LIVE',reveal:'ANSWER REVEALED',finished:'BRIDGE RESTORED'})[s.status]||s.status;
   $('playerCount').textContent=s.players.length+' explorer'+(s.players.length===1?'':'s');
   $('responseCount').textContent=s.responses+' / '+s.players.length+' responses';
-  const completed=s.status==='finished'?s.total:s.status==='reveal'?s.step:Math.max(0,s.step-1);
+  const completed=s.cleared||0;
   $('classProgress').style.width=(100*completed/s.total)+'%';
   $('progressText').textContent=completed+' of '+s.total+' bridge pieces restored';
   const ul=$('playerList');ul.replaceChildren();
@@ -197,8 +197,8 @@ function renderTeacher(s) {
   else{$('teacherPrompt').textContent=s.question.prompt;$('teacherHint').textContent=s.status==='reveal'?'Discuss why the answer works.':'Let everyone choose an answer, then reveal it.';}
   buildChoices($('teacherChoices'),s.question?.choices,null,null,s.status==='reveal'?s.question.correct_choice:null,true);
   $('revealBox').hidden=s.status!=='reveal';
-  if(s.status==='reveal')$('revealBox').textContent='WHY IT WORKS · '+s.question.explanation;
-  $('advanceRoom').textContent=({lobby:'Begin adventure →',question:'Reveal answer →',reveal:s.step===s.total?'Finish the bridge →':'Next challenge →',finished:'Adventure complete'})[s.status];
+  if(s.status==='reveal')$('revealBox').textContent=(s.round_correct>0?'BRIDGE PIECE RESTORED · ':'NOT YET RESTORED · Talk it through, then retry. ')+'WHY IT WORKS · '+s.question.explanation;
+  $('advanceRoom').textContent=({lobby:'Begin adventure →',question:'Reveal answer →',reveal:s.round_correct===0?'Retry this challenge →':s.step===s.total?'Finish the bridge →':'Next challenge →',finished:'Adventure complete'})[s.status];
   $('advanceRoom').disabled=s.status==='finished';
 }
 function renderStudent(s) {
