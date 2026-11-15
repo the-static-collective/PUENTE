@@ -123,7 +123,7 @@ create or replace function public.puente_advance_room(p_code text)
 returns boolean language plpgsql security definer set search_path = ''
 as $$
 declare v_uid uuid := auth.uid(); v_code text:=upper(trim(p_code));
-  r public.puente_rooms%rowtype; v_total int;
+  r public.puente_rooms%rowtype; v_total int; v_round_correct int;
 begin
   if v_uid is null then raise exception 'Not signed in.'; end if;
   select * into r from public.puente_rooms where code=v_code and teacher_uid=v_uid and expires_at>now() for update;
@@ -134,7 +134,13 @@ begin
   elsif r.status='question' then
     update public.puente_rooms set status='reveal' where code=v_code;
   elsif r.status='reveal' then
-    if r.step>=v_total then
+    select count(*) into v_round_correct from public.puente_submissions
+    where room_code=v_code and step=r.step and correct;
+    if v_round_correct=0 then
+      -- No bridge piece earned: reset this round for a class retry.
+      delete from public.puente_submissions where room_code=v_code and step=r.step;
+      update public.puente_rooms set status='question' where code=v_code;
+    elsif r.step>=v_total then
       update public.puente_rooms set status='finished' where code=v_code;
     else
       update public.puente_rooms set status='question',step=r.step+1 where code=v_code;
@@ -172,7 +178,7 @@ returns jsonb language plpgsql security definer set search_path = ''
 as $$
 declare v_uid uuid := auth.uid(); v_code text:=upper(trim(p_code));
   r public.puente_rooms%rowtype; q puente_private.questions%rowtype;
-  v_players jsonb; v_responses int; v_total int; v_choice int;
+  v_players jsonb; v_responses int; v_total int; v_choice int; v_cleared int; v_round_correct int;
 begin
   if v_uid is null then raise exception 'Sign in to see this classroom.'; end if;
   select * into r from public.puente_rooms where code=v_code and expires_at>now();
@@ -185,6 +191,10 @@ begin
     select * into q from puente_private.questions where language=r.language and step=r.step;
   end if;
   select count(*) into v_responses from public.puente_submissions where room_code=v_code and step=r.step;
+  select count(distinct step) into v_cleared from public.puente_submissions
+  where room_code=v_code and correct;
+  select count(*) into v_round_correct from public.puente_submissions
+  where room_code=v_code and step=r.step and correct;
   select s.choice into v_choice from public.puente_submissions s
   where s.room_code=v_code and s.step=r.step and s.user_id=v_uid;
   select coalesce(jsonb_agg(jsonb_build_object('alias',x.alias,'score',x.score) order by x.alias),'[]'::jsonb)
@@ -197,7 +207,8 @@ begin
   ) x;
   return jsonb_build_object(
     'code',r.code,'language',r.language,'status',r.status,'step',r.step,
-    'total',v_total,'players',v_players,'responses',v_responses,
+    'total',v_total,'cleared',v_cleared,'round_correct',v_round_correct,
+    'players',v_players,'responses',v_responses,
     'my_choice',v_choice,
     'question',case when r.step=0 or q.id is null then null
       else jsonb_build_object('prompt',q.prompt,'choices',q.choices,
