@@ -25,6 +25,29 @@ A bilingual, cooperative classroom game for phones. Teachers host a room; learne
 **Intended website:** https://puente.abundent.org/
 **GitHub Pages fallback:** https://the-static-collective.github.io/PUENTE/
 
+## NEW: PUENTE 003 · The Village Assembly
+
+The third chapter allows students to influence what PUENTE creates **while they play**, without collecting free-text student submissions.
+
+When the class restores **three** bridge pieces, members unlock an optional **Village Assembly**. Each member may choose one of three next-world destinations (Marketplace, Radio Station, Missing Words Mystery) and one of three game formats:
+
+- **Signal Tuner:** rotate among three broadcast channels, decode a phrase, and transmit a response.
+- **Map Navigator:** choose between three destinations on a visual map.
+- **Word Weave:** rotate three word tiles to assemble a grammatically correct phrase before locking it in.
+
+These are three distinct phone interaction surfaces that all submit an answer index validated by the existing classroom server. The Word Weave puzzle additionally requires actual word-order recognition; radio and map emphasize different presentation and navigation interactions, not different grading algorithms. No individual classroom votes or student identities are copied into new quest drafts.
+
+Students can revise their preferences before the class ends. When the teacher finishes the final challenge, PUENTE takes **aggregate votes** (if any) together with aggregate challenge performance to generate **one reviewable Quest Garden draft**. If nobody votes, the garden still creates an exploratory draft. Only an adult teacher may approve and share the candidate; the student vote is not approval or evidence of learning.
+
+### Technical boundaries
+
+* **Same-device demo:** all three minigames and the Village Assembly work with no backend; data is confined to the browser profile.
+* **Multi-phone rooms:** a dedicated Supabase project must have [schema.sql](supabase/schema.sql), [garden-v2.sql](supabase/garden-v2.sql), and **[village-assembly-v3.sql](supabase/village-assembly-v3.sql)** applied **in that order**, anonymous sign-ins enabled, and only its project URL plus publishable key in config.js. This has not been applied on your behalf. Until the upgrade is installed, older live rooms continue working but Village Assembly doesn't display.
+* **Student privacy:** the backend stores at most one revisable pair of numeric votes per authenticated room member, attached to a temporary anonymous session. Direct table access is revoked; only class-wide counts are shown to the teacher. It expires with the room but physical row deletion still needs the documented administrative cleanup task.
+* **Not endless new language knowledge:** the automatically generated games reuse finite authored language material, with different settings and mechanics; the teacher can import new ChatGPT-authored lessons for a larger supply.
+
+**Tested:** Jest-free Node test suite runs as a GitHub Actions gate before deployment. To test locally: `node tests/quest-garden.test.cjs`. Native MOTIF runtime is not installed in PUENTE; the opt-in and question-growth process is a source-reviewed adaptation of its Two Doors research, not a live MOTIF reasoning service.
+
 ## Playable features
 
 - Teacher's desk: create a room, show a code, start the adventure, reveal and explain answers, advance six challenges, see explorer counts/scores.
@@ -102,10 +125,14 @@ The public app includes no API secrets. Browser users may only reach room operat
 - styles.css — responsive layout and bridge illustration
 - app.js — classroom UI, local demo, backend RPC client, homework
 - garden.js — reviewed source bank, pure recombination, bounded pack schema, local library
+- game-lab.js — three game formats, safe Word Weave phrases, reviewed pack adaptation
+- play-modes.js — mobile radio, map and word-rotation interaction controls
+- next-game.js — optional Village Assembly voting, aggregate-only tally UI
 - garden-ui.js — teacher review, publish gate, import/export, practice-link sharing, class-level seed generator
 - config.js — blank public backend config by default
 - supabase/schema.sql — dedicated-classroom backend
 - supabase/garden-v2.sql — secure approved-pack upgrade, when live backend is configured
+- supabase/village-assembly-v3.sql — optional teacher-only aggregates and limited student votes
 - docs/GROWTH-LOOP.md — cross-repo MOTIF inspiration and falsifiable experiment plan
 - .github/workflows/pages.yml — GitHub Pages deployment
 
