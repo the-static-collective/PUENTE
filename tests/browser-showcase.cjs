@@ -52,7 +52,7 @@ async function main(){
     assert.equal(await student.locator("#protocolRelays .protocol-node").count(),6);
     assert.ok(await student.locator("#protocolPulse").isDisabled(),"Physical route must be ready before transmitting.");
     const relayState=await student.evaluate(()=>{
-      const G=window.PuenteProtocol,p=G.generate(2707,"es");
+      const G=window.PuenteProtocol,p=G.generate(1001,"es");
       return {answer:p.solution,bad:G.BASE.find(n=>n!==p.solution)};
     });
     for(let i=0;i<6;i++)if((relayState.bad>>i)&1)
@@ -156,7 +156,7 @@ async function main(){
     const offlineURL="file://"+path.join(root,"showcase-offline.html");
     const {ctx:offlineCtx,page:offline}=await openPage(offlineURL,"mobile");
     await offline.locator("#protocolScreen").waitFor({state:"visible"});
-    const offlineAnswer=await offline.evaluate(()=>window.PuenteProtocol.generate(2707,"es").solution);
+    const offlineAnswer=await offline.evaluate(()=>window.PuenteProtocol.generate(1001,"es").solution);
     for(let i=0;i<6;i++)if((offlineAnswer>>i)&1)
       await offline.locator('#protocolRelays [data-relay="'+String.fromCharCode(65+i)+'"]').click();
     await offline.locator("#protocolPulse").click();
