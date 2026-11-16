@@ -33,6 +33,7 @@
             <button class="btn outlined" id="goBuildPuzzle" type="button">Build a level</button>
           </div>
           <p class="hero-proof"><span aria-hidden="true">✦</span> Ready to try · No account · No setup · About a minute</p>
+          <button class="hero-challenge" id="goHeist" type="button"><span class="heist-tag">HARD MODE</span><span>Operation Signal Heist</span><span aria-hidden="true">↗</span></button>
           <button class="hero-text-link" id="goTeacher" type="button">Teacher? See your classroom tools →</button>
         </div>
         <div class="landscape" aria-label="Illustration: an unfinished bridge between two green hills">
@@ -221,6 +222,10 @@
             <div><strong>YOU ARE THE LEVEL DESIGNER</strong><p>Design a language maze. Every player must solve at least one word lock to reach the exit. Optional paired portals bend the route.</p></div>
             <span id="puzzleState" class="pill">BUILD MODE</span>
           </div>
+          <div class="mission-select" role="group" aria-label="Choose a puzzle mission">
+            <button id="puzzleWarmup" type="button" class="mission-card"><span class="mission-level">01 / WARM-UP</span><strong>The Broken Bridge</strong><small>One language lock · Quick introduction</small></button>
+            <button id="puzzleHeist" type="button" class="mission-card mission-card-hard"><span class="mission-level">02 / HARD MODE</span><strong>Operation Signal Heist</strong><small>Three mandatory grammar locks · Two signal fragments · Route optimization</small></button>
+          </div>
           <div class="workshop-grid">
             <div class="panel workshop-map-panel">
               <div class="panel-top"><span id="puzzleBoardLabel" class="eyebrow">MAP EDITOR · 8 × 6</span><span id="puzzleMapId" class="mini-stat">NEW CREATION</span></div>
@@ -229,6 +234,12 @@
               </div>
               <div class="puzzle-legend" aria-label="Map legend"><span>◉ START</span><span>⚑ EXIT</span><span>◆ WORD LOCK</span><span>↔ PORTAL PAIR</span></div>
               <div id="puzzleStatus" class="puzzle-status" role="status" aria-live="polite">Choose a tool and tap a tile to begin building.</div>
+              <div id="puzzleObjective" class="puzzle-objective" hidden aria-live="polite">
+                <span class="objective-tag">MISSION / RECOVER BOTH FRAGMENTS</span>
+                <span id="puzzleFragmentA" class="objective-fragment">◇ SIGNAL A</span>
+                <span id="puzzleFragmentB" class="objective-fragment">◇ SIGNAL B</span>
+                <span class="objective-extract" id="puzzleExtraction">EXTRACTION SEALED</span>
+              </div>
               <div id="puzzleMoveControls" class="puzzle-move-controls" hidden>
                 <button type="button" data-move="0,-1" aria-label="Move up">↑</button>
                 <div><button type="button" data-move="-1,0" aria-label="Move left">←</button>
@@ -243,8 +254,9 @@
               </div>
               <div id="puzzleVictory" class="puzzle-victory" hidden>
                 <p class="eyebrow">PUZZLE SOLVED</p>
-                <h3>You made it across!</h3>
+                <h3 id="puzzleVictoryTitle">You made it across!</h3>
                 <p id="puzzleVictoryStats"></p>
+                <p id="puzzleBestRun" class="puzzle-best-run"></p>
                 <div class="action-row"><button type="button" class="btn primary" id="puzzleRemix">Remix this level →</button>
                 <button type="button" class="btn outlined" id="puzzleReplay">Play again</button></div>
               </div>
@@ -266,10 +278,12 @@
                   <button class="puzzle-tool" type="button" data-tool="gate" aria-pressed="false"><span>◆</span> Word lock</button>
                   <button class="puzzle-tool" type="button" data-tool="P" aria-pressed="false"><span>A</span> Portal A</button>
                   <button class="puzzle-tool" type="button" data-tool="Q" aria-pressed="false"><span>B</span> Portal B</button>
+                  <button class="puzzle-tool" type="button" data-tool="X" aria-pressed="false"><span>◈</span> Fragment A</button>
+                  <button class="puzzle-tool" type="button" data-tool="Y" aria-pressed="false"><span>◈</span> Fragment B</button>
                 </div>
                 <label class="top-gap">Word lock challenge
                   <select id="puzzleClue"></select>
-                  <small>Choose a clue, then paint a ◆ tile. Teachers can inspect each clue before sharing.</small>
+                  <small>Choose a clue from Foundations or Advanced Grammar, then paint a ◆ tile. Signal Heist maps require both fragments and at least two locks.</small>
                 </label>
                 <div class="action-row top-gap">
                   <button type="button" class="btn outlined small" id="puzzleUndo">↶ Undo</button>
@@ -277,7 +291,7 @@
                   <button type="button" class="btn outlined small" id="puzzleExample">Load example</button>
                   <button type="button" class="btn outlined small" id="puzzleBlank">New blank</button>
                 </div>
-                <p class="help">A valid puzzle needs exactly one start and exit, 1–4 language locks, an achievable route, and no way to bypass every language lock.</p>
+                <p class="help">A valid puzzle needs exactly one start and exit, 1–4 language locks, an achievable route, and no way to bypass every language lock. Signal Heists also require both fragments before extraction.</p>
                 <p class="help"><strong>First-time builder?</strong> Change a wall or add a lock in the example. Press Test my puzzle, solve it, then share the draft link.</p>
                 <button type="button" class="btn primary puzzle-wide" id="puzzleTest">▶ Test my puzzle</button>
                 <div class="action-row top-gap"><button type="button" class="btn outlined" id="puzzleSave">Save draft on this phone</button>
@@ -286,8 +300,8 @@
               <div id="puzzlePlayPanel" hidden>
                 <p class="eyebrow">YOU ARE THE EXPLORER</p>
                 <h3 id="puzzlePlayTitle">Find the exit</h3>
-                <p class="help">Move using the arrow buttons or keyboard arrows. Word locks ask language questions. Paired portals move you across the map.</p>
-                <div class="puzzle-play-stats"><span id="puzzleMoves">0 steps</span><span id="puzzleUnlocked">0 locks opened</span></div>
+                <p class="help" id="puzzlePlayBrief">Move using the arrow buttons or keyboard arrows. Word locks ask language questions. Paired portals move you across the map.</p>
+                <div class="puzzle-play-stats"><span id="puzzleMoves">0 steps</span><span id="puzzleUnlocked">0 locks opened</span><span id="puzzleMistakes">0 errors</span></div>
                 <div class="action-row top-gap"><button type="button" class="btn outlined" id="puzzleBackToEdit">← Return to editor</button>
                 <button type="button" class="btn outlined" id="puzzleResetPlay">Restart</button></div>
               </div>
