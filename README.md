@@ -2,6 +2,23 @@
 
 Chapter 001: The Broken Bridge / El Puente Roto
 
+## NEW: PUENTE 005 · Operation Signal Heist (high-school challenge)
+
+**Play the heist:** https://puente.abundent.org/?heist=1
+
+The original 60-second, beginner-friendly **Broken Bridge** example remains playable at `/?try=1`. For teenagers or higher-level language learners, a new **Hard Mode / Signal Heist** mission is available from the homepage or inside Puzzle Workshop.
+
+- **Three mandatory advanced grammar gates:** one past-perfect tense puzzle, one subjunctive puzzle and one logical connector puzzle. The map has a fourth optional lock, which can be used as an alternate route.
+- **No multiple-choice shortcut at those advanced fill-in gates:** players type the missing word or phrase. Matching ignores written accents and casing; spelling/grammar otherwise matters. An optional *initial-letter hint* offers a scaffold without giving away the whole phrase.
+- **Two signal fragments (X and Y):** the player must find both before the extraction tile opens. Walking directly to EXIT fails until both are recovered.
+- **Meaningful route planning:** the maze contains a two-way portal, detours and an alternate lock. The engine now uses inventory-aware shortest-path search and rejects routes where language gates can all be avoided.
+- **Replay:** completion shows personal best moves/errors and an optimal-step benchmark. Local records contain only aggregate puzzle metrics (no names, accounts or server writes), allowing players to try a cleaner route.
+- **Creation:** student map designers can paint X/Y fragment tiles and select from an expanded 20-question bank in each direction (10 foundations + 10 advanced). Heist maps require both fragments and two or more language locks. Old `puente.map-puzzle/v1` links remain readable.
+
+Advanced grammar content is an **authored prototype**, not teacher-vetted course material. It should be reviewed for age, proficiency and learning goals before an actual class pilot. None of the answer texts typed into cipher inputs are saved or transmitted.
+
+**Engineering:** `tests/puzzle-workshop.test.cjs` now tests item collection, mandatory grammar locks, sealed extraction, signed-free packet compatibility and remix lineage; `tests/browser-showcase.cjs` plays through the actual three-typed-answer heist in Chromium before publishing.
+
 ## NEW · Quest Garden v1 (MOTIF-inspired)
 
 **Play → Observe class-level results → Generate a candidate → Teacher review → Approve → Replay → Repeat.** Every completed teacher-led classroom session automatically drafts a new **six-challenge** adventure in the teacher's browser. It observes only counts per round and the challenge topic, not student names or individual answers. If too few responses exist, the candidate is explicitly marked exploratory.
