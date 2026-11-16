@@ -330,6 +330,9 @@ function init(){
   $('goTryPuzzle').addEventListener('click',()=>{
     window.PuentePuzzleUI.startDemo();showScreen('workshop');
   });
+  $('goHeist').addEventListener('click',()=>{
+    window.PuentePuzzleUI.startHeist();showScreen('workshop');
+  });
   $('goBuildPuzzle').addEventListener('click',()=>{
     window.PuentePuzzleUI.openBuilder();showScreen('workshop');
   });
@@ -348,13 +351,13 @@ function init(){
   const url=new URL(location.href),join=url.searchParams.get('join');
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
   else if(url.searchParams.has('homework')||url.searchParams.has('practicePack'))showScreen('practice');
-  else if(url.searchParams.has('workshop')||url.searchParams.has('try')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
+  else if(url.searchParams.has('workshop')||url.searchParams.has('try')||url.searchParams.has('heist')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
   practice.language=$('practiceLanguage').value;
   renderPractice();
   connect().then(async()=>{
     try {
       const saved=JSON.parse(sessionStorage.getItem('puente.session')||'null');
-      if(!['workshop','try','puzzleDraft','puzzle','homework','practicePack'].some(k=>url.searchParams.has(k)) && saved&&saved.code&&['teacher','student'].includes(saved.role)){
+      if(!['workshop','try','heist','puzzleDraft','puzzle','homework','practicePack'].some(k=>url.searchParams.has(k)) && saved&&saved.code&&['teacher','student'].includes(saved.role)){
         session=saved;
         if(saved.role==='teacher'){$('createPanel').hidden=true;$('teacherRoom').hidden=false;showScreen('teacher');}
         else {$('joinForm').hidden=true;$('studentRoom').hidden=false;showScreen('student');}
