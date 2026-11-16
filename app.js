@@ -120,7 +120,7 @@ const demo = {
   }
 };
 async function connect() {
-  if(!config.url || !config.publishableKey){$('connectionBadge').textContent='LOCAL DEMO';return;}
+  if(!config.url || !config.publishableKey){$('connectionBadge').textContent='PUZZLES READY';return;}
   try {
     const mod=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/+esm');
     db=mod.createClient(config.url,config.publishableKey,{auth:{persistSession:true,autoRefreshToken:true}});
