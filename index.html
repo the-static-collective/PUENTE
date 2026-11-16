@@ -90,6 +90,7 @@
               </aside>
             </div>
 
+            <div id="teacherAssembly" class="assembly panel" hidden></div>
             <div id="classGrowth" class="growth-card" hidden>
               <div><p class="eyebrow">AFTER THE ADVENTURE</p><h3>This class planted a new quest.</h3>
                 <p id="growthReceipt" class="help">A new draft awaits teacher review. Only round-level totals—not student identities—are used.</p></div>
@@ -111,6 +112,7 @@
             <h3 id="studentPrompt">Waiting for the teacher to begin…</h3>
             <div id="studentChoices" class="choices"></div>
             <div id="studentFeedback" class="feedback" aria-live="polite"></div>
+            <div id="studentAssembly" class="assembly panel" hidden></div>
             <button type="button" id="leaveStudent" class="text-button">← Leave this view</button>
           </div>
         </section>
@@ -151,9 +153,10 @@
                   <option value="time">Time and verbs</option><option value="objects">Objects and descriptions</option>
                   <option value="conversation">Everyday conversation</option>
                 </select></label>
+                <label>Game mechanic<select id="gardenMode"><option value="mixed">Mix all three mini-games</option><option value="signal">Signal Tuner · Radio</option><option value="map">Map Navigator · Routes</option><option value="forge">Word Weave · Sentences</option></select></label>
               </div>
               <button type="button" id="gardenGrow" class="btn primary">Grow a draft quest →</button>
-              <p class="help">No AI token or student data needed. This version recombines vetted, human-authored questions; it does not autonomously invent new facts.</p>
+              <p class="help">No AI token or student data needed. New games combine teacher-reviewed question banks and three different interaction mechanics. All new games require teacher approval.</p>
             </section>
             <section class="panel" aria-labelledby="importHeading">
               <div class="panel-top"><span class="eyebrow">02 / ASK YOUR CHATGPT</span><span class="mini-stat">Optional creative expansion</span></div>
@@ -197,6 +200,9 @@
   </div>
   <script src="./config.js"></script>
   <script src="./garden.js"></script>
+  <script src="./game-lab.js"></script>
+  <script src="./play-modes.js"></script>
+  <script src="./next-game.js"></script>
   <script src="./garden-ui.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
