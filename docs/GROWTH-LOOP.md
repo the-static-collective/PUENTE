@@ -49,3 +49,14 @@ Crossed: bounded question economy, explicit purpose, provenance and review autho
 Source execution: NOT_RUN. Live native integration: NOT_CONNECTED.
 Implementation: local generator plus teacher-approved pack library, with optional SQL adapter committed but not applied to an external project.
 Remaining HOLD: genuine pedagogy gain, independent samples, autonomous generation, student-driven world building.
+
+## 2026-11-15 update — PUENTE 003 / Village Assembly and Three Mechanics
+
+- Students now voluntarily select **one of three settings** and **one of three interaction forms** after restoring three bridge pieces. Revisions are allowed until class completion, and declining participation is permitted. The vote is about *game preferences*, not the truth of a historical or linguistic claim.
+- The same-game-answer 0..2 classroom protocol now supports a Signal Tuner dial, a Map Navigator with destination signs, and a Word Weave sentence-rotation activity. The Word Weave questions use an additional teacher-authored three-word bank in both languages, while Signal and Map reuse existing bounded lesson prompts.
+- At completion the teacher browser creates exactly one candidate quest, taking both aggregate performance by topic and aggregate game design votes into account. Teacher must still inspect all answers and explicitly approve the candidate. A finite bank does not equal endlessly new educational knowledge.
+- The mobile UI modules are game-lab.js, play-modes.js and next-game.js. Student vote aggregation and row-level database security are defined in supabase/village-assembly-v3.sql, **committed but not applied to a live Supabase project**.
+- GitHub Actions now runs Node checks for six-question packs, phrase rotations, cyclic choices, story-world selection, a three-piece unlock, revisable votes, student-versus-teacher visibility, and static page wiring before deployment. These are reproducible software tests, not measured learning outcomes.
+- MOTIF RECIPROCAL-002 remains **unmerged research inspiration only**. There was no native MOTIF model call, training, branch execution, or autonomous content approval.
+
+**Next informative probe:** compare student engagement and language retention between (a) the Word Weave mechanic and (b) the same word-order tasks in conventional multiple-choice form under an approved school/teacher protocol. Until measured, comparative effectiveness = HOLD.
