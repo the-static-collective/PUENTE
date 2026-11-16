@@ -27,6 +27,8 @@ jobs:
         run: |
           node tests/quest-garden.test.cjs
           node tests/puzzle-workshop.test.cjs
+      - name: Build self-contained offline showcase
+        run: node scripts/build-offline.cjs
       - name: Install headless browser for a real human-flow test
         run: |
           npm install --no-save playwright@1.56.1
