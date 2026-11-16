@@ -11,7 +11,7 @@ html=html.replace('<link rel="stylesheet" href="./styles.css">',"<style>\n"+css+
 const icon=Buffer.from(file("favicon.svg"),"utf8").toString("base64");
 html=html.replace('href="./favicon.svg"','href="data:image/svg+xml;base64,'+icon+'"');
 html=html.replace('<main>','<main><p class="offline-banner">OFFLINE SHOWCASE · Play and edit without Wi-Fi. Classroom rooms and published links need an internet connection.</p>');
-const names=["config.js","garden.js","game-lab.js","play-modes.js","next-game.js","garden-ui.js","puzzle-engine.js","puzzle-ui.js","protocol-engine.js","protocol-ui.js","app.js"];
+const names=["config.js","garden.js","game-lab.js","play-modes.js","next-game.js","garden-ui.js","puzzle-engine.js","puzzle-ui.js","protocol-engine.js","protocol-ui.js","studio-engine.js","studio-ui.js","app.js"];
 for(const name of names){
   let code=file(name);
   if(code.includes("</script>"))throw Error("Unsafe inline script closing sequence in "+name);
