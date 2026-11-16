@@ -191,3 +191,11 @@ textarea{width:100%;min-width:0;padding:14px 15px;border:1px solid #c9d7d1;borde
 
 .puzzle-cell.is-lock{background:linear-gradient(135deg,#b38c4d,#8c6336);color:#fff7ce;border:2px solid #e5c27f;box-shadow:0 0 10px rgba(219,167,94,.3)}
 .puzzle-cell.is-lock.solved{background:#638d61;border-color:#bce4a1;color:#e8ffde}
+
+/* Advanced cipher lock: type the grammar, not just tap a correct-looking option. */
+.cipher-form{display:flex;flex-direction:column;gap:10px}
+.cipher-entry{display:block;width:100%;min-height:58px;padding:14px 16px;border-radius:12px;border:2px solid #ad8a5c;background:#fffdf8;color:#293f37;font-size:18px;font-weight:800;letter-spacing:.2px}
+.cipher-entry:focus-visible{outline:3px solid #527e7a;outline-offset:3px}
+.cipher-submit{min-height:50px;align-self:stretch}
+.cipher-hint{min-height:40px;align-self:flex-start;font-size:12px}
+.cipher-form .help{margin:0;font-size:12px;line-height:1.6}
