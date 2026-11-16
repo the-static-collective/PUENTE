@@ -285,6 +285,7 @@ function init(){
   $("puzzleResetPlay").addEventListener("click",()=>startRun(mode));
   $("puzzleReplay").addEventListener("click",()=>startRun(mode));
   $("puzzleRemix").addEventListener("click",remix);
+  $("puzzleReviewTest").addEventListener("click",()=>startRun("test"));
   $("puzzleReviewChecked").addEventListener("change",renderReview);
   $("puzzleApprove").addEventListener("click",approve);
   $("puzzleCopy").addEventListener("click",async()=>{
@@ -313,7 +314,7 @@ function init(){
     }catch(err){board=P.sample("es");mode="build";status("Invalid puzzle link: "+err.message,true);}
   }
   showTool(brush);renderShelf();render();
-  if(draft)$("puzzleTeacherReview").scrollIntoView({behavior:"smooth",block:"start"});
+  // Page navigation to the workshop is handled by the main app after its tabs bind.
 }
 root.PuentePuzzleUI={init,remix};
 })(window);
