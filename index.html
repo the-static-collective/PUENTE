@@ -34,7 +34,8 @@
           </div>
           <p class="hero-proof"><span aria-hidden="true">✦</span> Real logic puzzle · No account · No answers to guess</p>
           <button class="hero-challenge" id="goHeist" type="button"><span class="heist-tag">HARD MODE</span><span>Operation Signal Heist</span><span aria-hidden="true">↗</span></button>
-          <button class="hero-text-link" id="goTeacher" type="button">Teacher? See your classroom tools →</button>
+          <button class="hero-text-link" id="goStudio" type="button">Teaching this? Make your own lesson in the Playroom →</button>
+          <button class="hero-text-link hero-secondary-link" id="goTeacher" type="button">Teacher's live classroom tools →</button>
         </div>
         <div class="landscape" aria-label="Illustration: an unfinished bridge between two green hills">
           <div class="stars" aria-hidden="true">✳ &nbsp; ✶ &nbsp; ✳</div>
@@ -60,6 +61,7 @@
         <div><span class="how-number">04</span><strong>Remix</strong><small>Keep the games growing</small></div>
       </section>
       <nav class="mode-nav" aria-label="Ways to play">
+        <button class="mode" type="button" data-screen="studio" aria-pressed="false">✦ / Teacher's Playroom</button>
         <button class="mode" type="button" data-screen="protocol" aria-pressed="false">00 / Relay Protocol</button>
         <button class="mode active" type="button" data-screen="teacher" aria-pressed="true">01 / Teacher's desk</button>
         <button class="mode" type="button" data-screen="student" aria-pressed="false">02 / Student portal</button>
@@ -135,6 +137,90 @@
                 <button id="protocolNew" class="btn outlined small" type="button">Generate another</button></div>
             </div>
           </div>
+        </section>
+        <section id="studioScreen" class="screen" hidden aria-labelledby="studioHeading">
+          <div class="section-heading"><div><p class="eyebrow">FOR THE FIRST PLAYER: THE TEACHER</p>
+            <h2 id="studioHeading">Teacher's Playroom</h2></div>
+            <p class="section-aside">A lesson-design toy. Twist the dials, see what appears, play it yourself, and keep the good ones.</p></div>
+          <div class="studio-welcome"><span class="studio-welcome-sticker">YOUR TURN TO PLAY</span>
+            <div><strong>You don't have to plan a lesson before you start.</strong>
+              <p>Pick a mood, roll a problem, and see if you can solve it. Once it's interesting, turn it into a lesson.</p></div>
+            <button id="studioRoll" type="button" class="btn primary studio-roll">✦ Surprise me</button>
+          </div>
+          <div class="studio-layout">
+            <section class="panel studio-dials" aria-labelledby="studioKnobs">
+              <p class="eyebrow">01 / GIVE IT A TWIST</p><h3 id="studioKnobs">Your lesson dials</h3>
+              <div class="studio-field-stack">
+                <label>Language<select id="studioLanguage"><option value="es">Spanish · Español</option><option value="en">English · Inglés</option></select></label>
+                <label>How much of a brain-teaser?<select id="studioRank"><option value="stretch">Stretch · 5 connected rules</option><option value="starter">On-ramp · 4 connected rules</option></select></label>
+                <label>What language idea is hiding in it?<select id="studioFocus">
+                  <option value="all">A little of everything</option>
+                  <option value="conditional">If this, then that</option>
+                  <option value="contrast">Either, neither, and not both</option>
+                  <option value="quantity">Exactly one, two, or at least one</option>
+                </select></label>
+                <label>Where does the story happen?<select id="studioScene">
+                  <option value="radio">Pirate radio station</option>
+                  <option value="museum">Museum after midnight</option>
+                  <option value="town">Department of Unnecessary Emergencies</option>
+                  <option value="observatory">An observatory</option>
+                  <option value="stage">Backstage blackout</option>
+                </select></label>
+                <label>Time available<select id="studioMinutes"><option value="10">10 minutes</option><option value="20" selected>20 minutes</option><option value="30">30 minutes</option></select></label>
+              </div>
+              <p class="help">These dials choose a mathematically checked logic puzzle and a lesson framing. They do not secretly ask AI to invent facts.</p>
+            </section>
+            <section class="studio-preview panel" aria-labelledby="studioMissionName">
+              <div class="panel-top"><span class="eyebrow">02 / HERE'S WHAT APPEARED</span><span id="studioCode" class="mini-stat">PROTOCOL —</span></div>
+              <h3 id="studioMissionName">The Pirate Radio Station</h3>
+              <p id="studioStory" class="studio-story">A mysterious signal awaits…</p>
+              <div class="studio-game-spec"><span>6 RELAYS</span><span>3 ACTIVE</span><span id="studioRuleCount">5 RULES</span><span>1 SOLUTION</span></div>
+              <p class="studio-mission-label">THE INTERCEPTED INSTRUCTIONS</p>
+              <ol id="studioRules" class="studio-rules"></ol>
+              <button id="studioTranslate" type="button" class="text-button studio-translate">See teacher's translations</button>
+              <div class="studio-preview-actions">
+                <button id="studioPlay" type="button" class="btn primary">▶ Try it as a student</button>
+                <button id="studioPeek" type="button" class="btn outlined">Peek at the solution</button>
+              </div>
+              <div id="studioAnswer" class="studio-answer" hidden><strong>TEACHER-ONLY KEY</strong><p id="studioAnswerText"></p><p class="help">Students don't see this on their challenge link. Save it for your debrief.</p></div>
+              <p class="studio-feedback" id="studioFeedback" aria-live="polite"></p>
+            </section>
+          </div>
+          <div class="studio-bottom-grid">
+            <section class="panel studio-plan" aria-labelledby="studioPlanHeading">
+              <div class="panel-top"><span class="eyebrow">03 / MAKE IT A LESSON</span><span class="pill">READABLE · PRINTABLE</span></div>
+              <h3 id="studioPlanHeading">Your lesson card</h3>
+              <p class="studio-target" id="studioTarget"></p>
+              <div id="studioAgenda" class="studio-agenda"></div>
+              <label>Anything you want to add? <small>Only on this browser; does not change the actual relay puzzle.</small>
+                <textarea id="studioNotes" maxlength="1200" rows="4" placeholder="A class topic, a joke, a discussion question, or something Chitty suggested…"></textarea>
+              </label>
+              <div class="action-row studio-actions">
+                <button id="studioKeep" class="btn primary" type="button">Keep this lesson ★</button>
+                <button id="studioPrint" class="btn outlined" type="button">Print lesson card</button>
+                <button id="studioCopyPlan" class="btn outlined" type="button">Copy lesson</button>
+              </div>
+              <div id="studioPrintSheet" class="studio-print-sheet" aria-hidden="true"></div>
+            </section>
+            <section class="panel studio-chitty" aria-labelledby="studioChatHeading">
+              <div class="panel-top"><span class="eyebrow">04 / INVITE A COLLABORATOR</span><span class="pill">OPTIONAL</span></div>
+              <h3 id="studioChatHeading">Call in Chitty Chitty Bang Bang</h3>
+              <p>Since you already have a ChatGPT colleague, make it your writers' room. PUENTE supplies the real puzzle and exact answer; your AI can help invent a memorable opening, class discussion, and different ways to teach it.</p>
+              <div class="studio-chitty-card"><span aria-hidden="true">✳</span><p>“What if the museum alarm went off because somebody tried to steal the dictionary?”</p></div>
+              <div class="action-row studio-actions">
+                <button id="studioCopyChat" type="button" class="btn primary">Copy prompt for Chitty →</button>
+                <a class="btn outlined" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a>
+              </div>
+              <p class="help">Copy the prompt, paste it into your own ChatGPT conversation, and bring its best ideas back as lesson notes. There is no automatic connection to Chitty or access to student information.</p>
+              <div class="studio-further"><strong>Teacher's challenge</strong><p>Before peeking, try to solve the puzzle yourself. Then ask Chitty to write one misleading-but-fair clue for your students to debate.</p></div>
+            </section>
+          </div>
+          <section class="panel studio-shelf" aria-labelledby="studioShelfHeading">
+            <div class="panel-top"><span class="eyebrow">YOUR COLLECTION</span><span id="studioShelfCount" class="mini-stat">0 kept</span></div>
+            <h3 id="studioShelfHeading">Ideas worth keeping</h3>
+            <div id="studioSaved" class="studio-saved"></div>
+            <p class="privacy-note">Kept lessons stay in this browser unless you copy or print them. No student accounts, auto-posting, model API, or classroom database are required. A teacher checks all lesson content before students see it.</p>
+          </section>
         </section>
         <section id="teacherScreen" class="screen" aria-labelledby="teacherHeading">
           <div class="section-heading"><div><p class="eyebrow">FOR THE GUIDE</p><h2 id="teacherHeading">Teacher's desk</h2></div><p class="section-aside">Create a room, project the bridge, and lead the adventure.</p></div>
@@ -415,6 +501,8 @@
   <script src="./puzzle-ui.js"></script>
   <script src="./protocol-engine.js"></script>
   <script src="./protocol-ui.js"></script>
+  <script src="./studio-engine.js"></script>
+  <script src="./studio-ui.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
