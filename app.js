@@ -228,7 +228,8 @@ function renderTeacher(s) {
   if(s.status==='lobby'){$('teacherPrompt').textContent='The bridge is waiting.';$('teacherHint').textContent='Invite explorers and begin when the class is ready.';}
   else if(s.status==='finished'){$('teacherPrompt').textContent='The bridge is whole again!';$('teacherHint').textContent='The village speaks. The class built this together.';}
   else{$('teacherPrompt').textContent=s.question.prompt;$('teacherHint').textContent=s.status==='reveal'?'Discuss why the answer works.':'Let everyone choose an answer, then reveal it.';}
-  buildChoices($('teacherChoices'),s.question?.choices,null,null,s.status==='reveal'?s.question.correct_choice:null,true);
+  if(s.status==='finished')$('teacherChoices').replaceChildren();
+  else buildChoices($('teacherChoices'),s.question?.choices,null,null,s.status==='reveal'?s.question.correct_choice:null,true);
   $('revealBox').hidden=s.status!=='reveal';
   if(s.status==='reveal')$('revealBox').textContent=(s.round_correct>0?'BRIDGE PIECE RESTORED · ':'NOT YET RESTORED · Talk it through, then retry. ')+'WHY IT WORKS · '+s.question.explanation;
   $('advanceRoom').textContent=({lobby:'Begin adventure →',question:'Reveal answer →',reveal:s.round_correct===0?'Retry this challenge →':s.step===s.total?'Finish the bridge →':'Next challenge →',finished:'Adventure complete'})[s.status];
@@ -252,6 +253,11 @@ function renderStudent(s) {
   }
   const q=s.question;
   const choiceBox=$('studentChoices');
+  if(s.status==='finished'){
+    choiceBox.className='choices';choiceBox.replaceChildren();
+    assembly.display($('studentAssembly'),s,voteNext);
+    return;
+  }
   const novel=s.pack_title&&s.pack_title!=='The Broken Bridge';
   const handled=novel&&playModes.render(choiceBox,q,{
     key:s.code+':'+s.step,answer,mine:s.my_choice,
