@@ -119,7 +119,7 @@ function load(){
 function save(work){
  const saved=load(),opts=options(work.options),puzzle=forge(opts,work.puzzle.seed).puzzle;
  ensure(puzzle.seed===work.puzzle.seed,"The lesson's puzzle no longer matches its source code.");
- const id=puzzle.seed+"-"+opts.language;
+ const id=puzzle.seed+"-"+opts.language+"-"+opts.scene+"-"+opts.minutes;
  const idx=saved.findIndex(x=>x.id===id);
  if(idx>=0)saved.splice(idx,1);
  saved.push({id,seed:puzzle.seed,options:opts,savedAt:new Date().toISOString()});
