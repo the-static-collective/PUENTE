@@ -238,15 +238,49 @@ function handleMove(dx,dy){
     if(result.type==="question")renderLock();
   }catch(err){status(err.message,true);}
 }
+// Cipher inputs are ephemeral: the typed string is compared locally, never
+// stored, transmitted, or included in the teacher handoff packet.
+function normalizeCipher(value){
+  return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLocaleLowerCase().trim().replace(/\s+/g," ").replace(/[.!?]+$/g,"");
+}
 function renderLock(){
   const panel=$("puzzleLockPanel"),q=run?.pending===null?null:P.question(board,run.pending);
   if(!q){panel.hidden=true;return;}
   panel.hidden=false;$("puzzleLockPrompt").textContent=q.prompt;
   const choices=$("puzzleLockChoices");choices.replaceChildren();
-  q.choices.forEach((text,i)=>{
-    const b=el("button","choice","ABC"[i]+".  "+text);b.type="button";
-    b.addEventListener("click",()=>answerLock(i));choices.append(b);
-  });
+  const isCipher=q.prompt.includes("___")&&q.code&&q.code>="k";
+  $("puzzleLockMode").textContent=isCipher?"CIPHER GATE / TYPE THE MISSING PHRASE":"LANGUAGE LOCK / DECODE THE MESSAGE";
+  if(isCipher){
+    const form=el("form","cipher-form");
+    const input=el("input","cipher-entry");
+    input.type="text";input.required=true;input.maxLength=70;input.autocomplete="off";
+    input.autocapitalize="off";input.spellcheck=false;
+    input.setAttribute("aria-label","Enter the missing phrase to complete the sentence");
+    input.placeholder=board.language==="es"?"Escribe la frase…":"Complete the phrase…";
+    const send=el("button","btn primary cipher-submit","DECRYPT SIGNAL →");send.type="submit";
+    const hint=el("button","btn outlined cipher-hint","Need a hint?");hint.type="button";
+    const clue=el("p","help","");
+    hint.addEventListener("click",()=>{
+      const answer=q.choices[q.correct];
+      clue.textContent="Word initials: "+answer.trim().split(/\s+/).map(w=>w[0].toUpperCase()).join(" · ")+" · You can omit written accents.";
+      hint.hidden=true;
+    });
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+      if(!input.value.trim())return;
+      const right=normalizeCipher(input.value)===normalizeCipher(q.choices[q.correct]);
+      answerLock(right?q.correct:(q.correct+1)%3);
+      if(!right){input.focus();input.select();}
+    });
+    form.append(input,send,hint,clue);choices.append(form);
+    input.focus({preventScroll:true});
+  }else{
+    q.choices.forEach((text,i)=>{
+      const b=el("button","choice","ABC"[i]+".  "+text);b.type="button";
+      b.addEventListener("click",()=>answerLock(i));choices.append(b);
+    });
+  }
 }
 function answerLock(i){
   if(!run?.pending&&run?.pending!==0)return;
