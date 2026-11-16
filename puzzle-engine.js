@@ -35,10 +35,38 @@ const PHRASES={
     ["“Please open the window.” ¿Qué debes abrir?",["La ventana","La puerta","La caja"],0,"“Window” significa ventana."]
   ]
 };
-const ENTRY="S",EXIT="E",WALL="#",FLOOR=".",P1="P",P2="Q";
-const isGate=t=>/^[a-j]$/.test(t);
+const ADVANCED={
+  es:[
+    ["Cuando llegué, ellos ya ___.",["se habían ido","se van","irán"],0,"“Cuando llegué” sets a past reference point; “se habían ido” describes what had already happened."],
+    ["No creo que él ___ la respuesta.",["sabe","sepa","sabía"],1,"“No creo que” expresses doubt and normally calls for the present subjunctive: “sepa”."],
+    ["Te llamaría si ___ tiempo.",["tendré","tengo","tuviera"],2,"A hypothetical present condition uses “si” + imperfect subjunctive: “tuviera”, with conditional “llamaría”."],
+    ["La señal está rota; ___ no podemos entrar.",["por eso","sin embargo","aunque"],0,"“Por eso” marks a result: the signal is broken, so we cannot enter."],
+    ["“Se me olvidaron las llaves.” What happened?",["I deliberately hid the keys","I forgot the keys","The keys were broken"],1,"“Se me olvidaron” describes forgetting the keys, often without stressing intent."],
+    ["Busco a alguien que ___ reparar la radio; no sé quién.",["sabe","sabía","sepa"],2,"The person is unidentified, so “que sepa” uses the subjunctive."],
+    ["“A pesar de la lluvia, seguimos.” Best interpretation?",["Despite the rain, we continued","Because it rained, we stopped","We left before it rained"],0,"“A pesar de” means despite; “seguimos” here means we continued."],
+    ["“El mensaje fue enviado por Ada.” Who sent it?",["The speaker","Ada","Someone unnamed"],1,"The passive “fue enviado por Ada” identifies Ada as the sender."],
+    ["“Llevo dos horas esperando.” What is happening?",["I waited for two hours yesterday","I will wait for two hours","I have been waiting for two hours"],2,"“Llevar + duration + gerund” describes an ongoing action begun in the past."],
+    ["“¿Para qué sirve esta llave?” What is asked?",["What is this key used for?","Where did this key come from?","Who made this key?"],0,"“¿Para qué sirve...?” asks about function or purpose."]
+  ],
+  en:[
+    ["By the time I arrived, they ___.",["had left","leave","will leave"],0,"The past perfect “had left” shows an earlier action before another past event."],
+    ["If I ___ more time, I'd decode the message.",["have","had","will have"],1,"A hypothetical present situation uses “if + past form” and “would + verb”: “If I had...”"],
+    ["The transmitter ___ before we got there.",["was fixing","has repaired","had been repaired"],2,"Past perfect passive “had been repaired” places the repair before arrival."],
+    ["Although the signal was weak, we ___ the message.",["understood","understand","will understanding"],0,"“Although” introduces a contrast; the simple past “understood” matches “was”."],
+    ["She suggested that he ___ the code again.",["checks","check","checked"],1,"In formal English, “suggested that” takes the plain form “check” in a mandative clause."],
+    ["“I nearly missed the train.” What happened?",["I definitely missed the train","I was nowhere near the train","I almost missed the train"],2,"“Nearly missed” means it was a close call, but the train was not missed."],
+    ["He denied ___ the lock.",["breaking","to break","break"],0,"The verb “deny” takes a gerund complement: “denied breaking”."],
+    ["The book ___ cover is red contains the clue.",["who's","whose","which"],1,"“Whose” shows possession: the book's cover is red."],
+    ["If they had checked earlier, they ___ the fault.",["will find","find","would have found"],2,"The unreal past conditional uses “had + participle” and “would have + participle”."],
+    ["“The message was intercepted.” What does it imply?",["Someone captured it in transit","Someone published it as intended","The sender did not write it"],0,"“Intercepted” means captured or stopped while being transmitted or delivered."]
+  ]
+};
+PHRASES.es.push(...ADVANCED.es); PHRASES.en.push(...ADVANCED.en);
+const ENTRY="S",EXIT="E",WALL="#",FLOOR=".",P1="P",P2="Q",FRAGMENT_A="X",FRAGMENT_B="Y";
+const isGate=t=>/^[a-t]$/.test(t);
 const idx=(x,y)=>y*W+x,xy=i=>({x:i%W,y:Math.floor(i/W)});
-const allow=t=>t===ENTRY||t===EXIT||t===WALL||t===FLOOR||t===P1||t===P2||isGate(t);
+const isFragment=t=>t===FRAGMENT_A||t===FRAGMENT_B;
+const allow=t=>t===ENTRY||t===EXIT||t===WALL||t===FLOOR||t===P1||t===P2||isGate(t)||isFragment(t);
 const clone=pack=>JSON.parse(JSON.stringify(pack));
 function empty({language="es",theme="village",parent="",generation=0}={}){
   return {schema:SCHEMA,language,theme,tiles:FLOOR.repeat(SIZE),parent,generation};
@@ -50,6 +78,12 @@ function sample(language="es"){
   cells[idx(1,4)]=P1;cells[idx(2,0)]=P2;
   return validate({...empty({language,theme:"village"}),tiles:cells.join("")});
 }
+// Signal Heist: recover two fragments before extraction. One route through
+// the central gate; a portal offers an alternative but never skips the clues.
+function heist(language="es"){
+  const rows=["########","##X###E#","##k#Q#.#","#S.m.l.#","#P.##Y##","########"];
+  return validate({...empty({language,theme:"observatory"}),tiles:rows.join("")});
+}
 function canonical(raw){
   if(!raw||typeof raw!=="object"||Array.isArray(raw))throw Error("Invalid map packet.");
   if(raw.schema!==SCHEMA)throw Error("Unsupported puzzle format.");
@@ -60,35 +94,39 @@ function canonical(raw){
   if(!Number.isInteger(raw.generation)||raw.generation<0||raw.generation>50)throw Error("Invalid revision generation.");
   return {schema:SCHEMA,language:raw.language,theme:raw.theme,tiles:raw.tiles,parent:raw.parent,generation:raw.generation};
 }
-function neighbors(pack,i,{blockGates=false}={}){
-  const {x,y}=xy(i),out=[];
-  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
-    const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;
-    const n=idx(nx,ny),t=pack.tiles[n];if(t===WALL||(blockGates&&isGate(t)))continue;
-    const pair=t===P1?P2:t===P2?P1:null;
-    const jump=pair===null?-1:pack.tiles.indexOf(pair);
-    if(jump>=0)out.push(jump);
-    else out.push(n);
-  }
-  return out;
+// Deterministic shortest route with an inventory bitmask (0, X, Y or XY).
+// Unlocked question gates are modeled as passable: answer skill is tested in play.
+function shortestRoute(pack,{blockGates=false}={}){
+ const start=pack.tiles.indexOf(ENTRY),finish=pack.tiles.indexOf(EXIT);
+ if(start<0||finish<0)return Infinity;
+ const required=pack.tiles.includes(FRAGMENT_A)&&pack.tiles.includes(FRAGMENT_B)?3:0;
+ const todo=[{pos:start,bits:0,moves:0}],seen=new Set([start+":0"]);
+ for(let i=0;i<todo.length;i++){
+   const {pos,bits,moves}=todo[i],{x,y}=xy(pos);
+   if(pos===finish&&bits===required)return moves;
+   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+     const nx=x+dx,ny=y+dy;if(nx<0||nx>=W||ny<0||ny>=H)continue;
+     let target=idx(nx,ny),tile=pack.tiles[target];
+     if(tile===WALL||(blockGates&&isGate(tile)))continue;
+     if(tile===P1||tile===P2){const other=pack.tiles.indexOf(tile===P1?P2:P1);if(other>=0)target=other;}
+     let nextBits=bits;
+     if(pack.tiles[target]===FRAGMENT_A)nextBits|=1;
+     if(pack.tiles[target]===FRAGMENT_B)nextBits|=2;
+     if(target===finish&&nextBits!==required)continue;
+     const key=target+":"+nextBits;
+     if(!seen.has(key)){seen.add(key);todo.push({pos:target,bits:nextBits,moves:moves+1});}
+   }
+ }return Infinity;
 }
-function reachable(pack,{blockGates=false}={}){
-  const start=pack.tiles.indexOf(ENTRY),finish=pack.tiles.indexOf(EXIT);
-  if(start===-1||finish===-1)return false;
-  const todo=[start],seen=new Set([start]);
-  for(let i=0;i<todo.length;i++){
-    const at=todo[i];if(at===finish)return true;
-    for(const next of neighbors(pack,at,{blockGates})){
-      if(!seen.has(next)){seen.add(next);todo.push(next);}
-    }
-  }return false;
-}
+function reachable(pack,options={}){return Number.isFinite(shortestRoute(pack,options));}
 function validate(raw){
   const p=canonical(raw),count=c=>[...p.tiles].filter(v=>v===c).length;
   if(count(ENTRY)!==1||count(EXIT)!==1)throw Error("Place exactly one START and one EXIT.");
   const gates=[...p.tiles].filter(isGate).length;
   if(gates<1||gates>4)throw Error("Add between one and four word locks.");
   if(count(P1)!==count(P2)||count(P1)>1)throw Error("Portals need one matched A and B, or neither.");
+  if(count(FRAGMENT_A)!==count(FRAGMENT_B)||count(FRAGMENT_A)>1)throw Error("A heist requires both signal fragments X and Y, or neither.");
+  if(count(FRAGMENT_A)===1&&gates<2)throw Error("Signal Heist needs at least two language locks.");
   if(!reachable(p))throw Error("No route reaches the exit. Rearrange walls or portals.");
   if(reachable(p,{blockGates:true}))throw Error("The exit is reachable without a word lock. Make language essential to escape.");
   return p;
@@ -96,11 +134,11 @@ function validate(raw){
 function place(raw,n,kind,{gate=0}={}){
   const p=canonical(raw);
   if(!Number.isInteger(n)||n<0||n>=SIZE)throw Error("Pick a tile on the board.");
-  if(![FLOOR,WALL,ENTRY,EXIT,P1,P2,"gate"].includes(kind))throw Error("Unknown builder tool.");
-  if(!Number.isInteger(gate)||gate<0||gate>=10)throw Error("Choose a valid word lock.");
+  if(![FLOOR,WALL,ENTRY,EXIT,P1,P2,FRAGMENT_A,FRAGMENT_B,"gate"].includes(kind))throw Error("Unknown builder tool.");
+  if(!Number.isInteger(gate)||gate<0||gate>=PHRASES[p.language].length)throw Error("Choose a valid word lock.");
   const tiles=[...p.tiles];
   const next=kind==="gate"?String.fromCharCode(97+gate):kind;
-  if([ENTRY,EXIT,P1,P2].includes(next))for(let i=0;i<tiles.length;i++)if(tiles[i]===next)tiles[i]=FLOOR;
+  if([ENTRY,EXIT,P1,P2,FRAGMENT_A,FRAGMENT_B].includes(next))for(let i=0;i<tiles.length;i++)if(tiles[i]===next)tiles[i]=FLOOR;
   tiles[n]=next;return canonical({...p,tiles:tiles.join("")});
 }
 function question(pack,tile){
@@ -138,11 +176,11 @@ function decode(value){
 }
 function newRun(raw){
   const pack=validate(raw);
-  return {pack,pos:pack.tiles.indexOf(ENTRY),unlocked:[],moves:0,mistakes:0,portals:0,pending:null,won:false,events:[]};
+  return {pack,pos:pack.tiles.indexOf(ENTRY),unlocked:[],collected:[],moves:0,mistakes:0,portals:0,pending:null,won:false,events:[]};
 }
 function move(run,dx,dy){
   if(run.won)return {type:"won"};
-  if(run.pending)return {type:"locked",message:"Answer the language lock first."};
+  if(run.pending!==null)return {type:"locked",message:"Answer the language lock first."};
   if(!Number.isInteger(dx)||!Number.isInteger(dy)||Math.abs(dx)+Math.abs(dy)!==1)throw Error("Use one step at a time.");
   const {x,y}=xy(run.pos),xx=x+dx,yy=y+dy;
   if(xx<0||xx>=W||yy<0||yy>=H)return {type:"wall"};
@@ -154,11 +192,17 @@ function move(run,dx,dy){
   return enter(run,to);
 }
 function enter(run,to){
-  const t=run.pack.tiles[to],pair=t===P1?P2:t===P2?P1:null;
-  if(pair){const target=run.pack.tiles.indexOf(pair);if(target>=0){to=target;run.portals++;run.events.push("portal");}}
-  run.pos=to;run.moves++;
-  if(run.pack.tiles[to]===EXIT){run.won=true;run.events.push("exit");return {type:"win",moves:run.moves};}
-  return {type:pair?"portal":"move",pos:run.pos};
+ const t=run.pack.tiles[to],pair=t===P1?P2:t===P2?P1:null;
+ if(pair){const other=run.pack.tiles.indexOf(pair);if(other>=0){to=other;run.portals++;run.events.push("portal");}}
+ const tile=run.pack.tiles[to],missing=[FRAGMENT_A,FRAGMENT_B].filter(k=>run.pack.tiles.includes(k)&&!run.collected.includes(k));
+ if(tile===EXIT&&missing.length)return {type:"sealed",missing};
+ run.pos=to;run.moves++;
+ if(isFragment(tile)&&!run.collected.includes(tile)){
+   run.collected.push(tile);run.events.push("fragment:"+tile);
+   return {type:"fragment",fragment:tile,remaining:[FRAGMENT_A,FRAGMENT_B].filter(k=>run.pack.tiles.includes(k)&&!run.collected.includes(k))};
+ }
+ if(tile===EXIT){run.won=true;run.events.push("exit");return {type:"win",moves:run.moves,optimal:shortestRoute(run.pack)};}
+ return {type:pair?"portal":"move",pos:run.pos};
 }
 function solve(run,choice){
   if(run.won)return {type:"won"};
@@ -168,7 +212,7 @@ function solve(run,choice){
   if(choice!==q.correct){run.mistakes++;run.events.push("retry");return {type:"retry",message:"Not quite. Re-read the message and try another interpretation."};}
   const next=run.pending;run.pending=null;run.unlocked.push(next);run.events.push("unlock");
   const entered=enter(run,next);
-  return {type:entered.type==="win"?"win":"unlocked",explanation:q.explanation,moves:run.moves};
+  return {type:entered.type==="win"?"win":"unlocked",explanation:q.explanation,moves:run.moves,optimal:entered.optimal};
 }
-root.PuentePuzzle={SCHEMA,W,H,SIZE,THEMES,PHRASES,ENTRY,EXIT,WALL,FLOOR,P1,P2,isGate,xy,idx,empty,sample,canonical,place,validate,reachable,question,hash,remix,encode,decode,newRun,move,solve,clone};
+root.PuentePuzzle={SCHEMA,W,H,SIZE,THEMES,PHRASES,ADVANCED,ENTRY,EXIT,WALL,FLOOR,P1,P2,FRAGMENT_A,FRAGMENT_B,isGate,isFragment,xy,idx,empty,sample,heist,canonical,place,validate,shortestRoute,reachable,question,hash,remix,encode,decode,newRun,move,solve,clone};
 })(typeof window==="undefined"?globalThis:window);
