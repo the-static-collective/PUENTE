@@ -343,7 +343,7 @@ function init(){
   const url=new URL(location.href),join=url.searchParams.get('join');
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
   else if(url.searchParams.has('homework')||url.searchParams.has('practicePack'))showScreen('practice');
-  else if(url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
+  else if(url.searchParams.has('workshop')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
   practice.language=$('practiceLanguage').value;
   renderPractice();
   connect().then(async()=>{
