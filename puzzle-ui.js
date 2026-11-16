@@ -118,6 +118,7 @@ function gridCell(t,i){
   const cell=el("button","puzzle-cell");
   cell.type="button";cell.dataset.cell=String(i);cell.dataset.tile=t;
   const [symbol,name]=labelTile(t);cell.textContent=symbol;
+  if(P.isGate(t))cell.classList.add("is-lock");
   const {x,y}=P.xy(i),here=run&&run.pos===i;
   if(here&&mode!=="build"){cell.textContent="●";cell.classList.add("player");}
   if(run?.unlocked.includes(i))cell.classList.add("solved");
