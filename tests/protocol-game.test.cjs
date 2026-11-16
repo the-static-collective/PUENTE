@@ -59,7 +59,7 @@ assert.equal(fresh.attempts,0);
 assert.throws(()=>G.codeTo("DROP TABLE"),/Invalid/);
 assert.throws(()=>G.codeTo("-23"),/Invalid/);
 assert.throws(()=>G.generate(-1),/code/);
-assert.throws(()=>G.generate(111,"xx"),/language/i);
+assert.throws(()=>G.generate(111,"xx"),/Spanish or English/i);
 for(const name of ["protocol-engine.js","protocol-ui.js"])
  assert.doesNotThrow(()=>new Function(require("fs").readFileSync(require("path").join(__dirname,"..",name),"utf8")));
 const html=require("fs").readFileSync(require("path").join(__dirname,"..","index.html"),"utf8");
