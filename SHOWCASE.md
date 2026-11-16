@@ -22,6 +22,23 @@ For a quick guided tour in Spanish mode:
 
 The prototype's difficulty is intentionally an **opt-in second tier**; the original `/?try=1` warm-up remains accessible for an unfamiliar adult viewer or a lower-proficiency classroom. An adult language teacher should review the grammar prompts before student use.
 
+## New preferred first showing: give them a real problem
+
+**Open:** https://puente.abundent.org/?protocol=RT&language=es  
+Or press **Break the network** on the homepage.
+
+Instead of walking a trivial corridor and identifying an English translation, show a network with **six relays, power for exactly three**, and five intercepted Spanish rules. Ask:
+
+> "There's only one configuration that gets a signal through. Each Spanish sentence is a constraint. Which three switches would you turn on—and why?"
+
+The **five-rule introductory challenge RT** has the solution **B + D + F**. For a clean live demo, allow them to reason first. If demonstrating the software rather than assessing comprehension, toggle B, D and F and transmit. That completes a physical route and every language condition, producing **Perfect Decode**. No answer choices or guess-the-translation quiz are involved.
+
+To demonstrate actual consequences, first toggle any three relays that form a physical route but do *not* obey every rule. The system rejects the transmission and reports how many of its conditions were satisfied; then fix the switches. Wrong pulses cost points, but they never lock players out.
+
+After solving, click **Forge the next challenge**. Every generated code gives a new, uniquely solvable puzzle. Shareable links contain only the safe code and selected language. An offline file opens directly into the same game.
+
+**For the teacher:** this is a 4–5-minute interpret-and-reason activity, not an engagement claim. The level builder and its supervised share-and-remix links remain a second demonstration; the previous single-gate maze is a beginner warm-up, not the main pitch.
+
 ## The one sentence
 
 **"The students don't just answer language questions—they build little games that teach the next students."**
