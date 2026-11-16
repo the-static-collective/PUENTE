@@ -16,7 +16,7 @@ const POINTS={
  IN:[30,195],A:[200,80],B:[200,195],C:[200,310],
  D:[430,80],E:[430,195],F:[430,310],OUT:[610,195]
 };
-let state=null,seed=2707,language="es";
+let state=null,seed=1001,language="es";
 let wires=[],buttons=[];
 const label=(n)=>G.LETTERS[n];
 function link(){
@@ -149,7 +149,7 @@ function transmit(){
   renderRules();status("SIGNAL ACCEPTED · All directives agree and the route is physical.");
  }else if(result.message){status(result.message,result.type==="reject"||result.type==="route");}
 }
-function load(nextSeed=2707,lang="es"){
+function load(nextSeed=1001,lang="es"){
  try{
   seed=G.seedValue(nextSeed);
   language=lang==="en"?"en":"es";
@@ -187,9 +187,9 @@ function init(){
  $("protocolNew").addEventListener("click",next);
  $("protocolReplay").addEventListener("click",()=>load(seed,language));
  const p=new URL(root.location.href).searchParams;
- let initial=2707;
+ let initial=1001;
  if(p.has("protocol"))try{initial=G.codeTo(p.get("protocol"));}
- catch{initial=2707;}
+ catch{initial=1001;}
  load(initial,p.get("language")==="en"?"en":"es");
 }
 root.PuenteProtocolUI={init,load,transmit};
