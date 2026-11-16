@@ -25,6 +25,48 @@ A bilingual, cooperative classroom game for phones. Teachers host a room; learne
 **Intended website:** https://puente.abundent.org/
 **GitHub Pages fallback:** https://the-static-collective.github.io/PUENTE/
 
+## NEW: PUENTE 004 · Puzzle Workshop — the level editor
+
+**Direct entry:** https://puente.abundent.org/?workshop=1
+
+A portal-puzzle-inspired visual level editor now lets any learner design a complete navigable 8 × 6 language maze without coding, ChatGPT accounts, or database access. This feature is separate from the realtime classroom game and works across phones through **self-contained links**.
+
+### Student makes a puzzle
+
+1. Open **05 / Puzzle Workshop**. A playable example has a start, finish, a mandatory language lock and a harmless paired portal.
+2. Choose Spanish or English and a story setting. Paint clear paths, walls, a start, an exit, 1–4 language locks, and optional portals A/B by tapping cells. Desktop supports drag-painting walls.
+3. Select a lock clue from **ten authored language tasks per language direction**. Multiple gates can use different questions. No arbitrary names, messages, chat or user-generated text are accepted in this first version.
+4. Use **Test my puzzle** to play it on the same device. Move with arrows/WASD or the on-screen arrow pad; unlock word gates by answering language questions. Stepping on portal A teleports to B and vice versa.
+5. Press **Send to teacher** to generate an **unapproved draft link**. Copy and share it yourself. Saving to the local draft shelf is optional.
+
+The engine rejects impossible mazes, missing start/exit, unmatched portal pairs, and layouts where someone could reach the exit **without encountering a language lock**. It therefore verifies the puzzle actually requires practicing language to complete. Validating reachability is *not* a proof of pedagogical effectiveness.
+
+### Teacher reviews and publishes
+
+1. Open the student's draft link (which has \`?puzzleDraft=\`).
+2. See a read-only map and every language challenge with its answer and explanation. Click **Playtest this map**, navigate to the exit, and return to the inspection desk.
+3. Check the explicit content-appropriateness box and click **Approve and create player link**.
+4. Copy the resulting \`?puzzle=\` link and distribute it to the class. The new level appears in the teacher browser's local approved shelf.
+
+The teacher's approval is a **client-side workflow**, not authenticated proof that the person approving is a teacher. A technical user could construct or modify a \`?puzzle=\` link without authorization. For real classroom use the adult should distribute approved links through their existing trusted class channel. Do not claim this is a school-approved publishing service.
+
+### The important recursion
+
+When a player completes any puzzle, **Remix this level** copies it into the visual editor with a parent-content fingerprint and increments its generation. The player can design a new route, add portals or locks, test it, and submit it for another teacher review. The parent fingerprint is a convenience lineage hint, **not cryptographic proof of authorship or ownership**.
+
+One puzzle can therefore spawn many independent forks, without modifying or deleting the original. Players are creating *new maps*, not merely rearranging quiz presentation.
+
+### Safety, privacy, limits
+
+- Puzzle packets include only version, language, selected world, a 48-tile alphabet, parent content fingerprint and remix count. All clue text comes from the application's authored language bank; **no identity or open-ended student text is transmitted**.
+- Links are encoded, **not secret or encrypted**. Avoid using them for formal testing, confidential homework, or unsupervised classroom publishing.
+- No database, student login, persistent user profile, AI inference service, or AI moderation is required. Approved puzzles are stored only on the adult's current device unless a link is shared, so there is not yet a verified school-wide gallery.
+- The builder's validation and playtest ensure navigability and interaction integrity, not factual proof that the material suits every learner. An adult still reviews it.
+- The visual level editor is **inspired by the general puzzle-workshop concept**; it is an original lightweight educational editor, not Portal 2 itself.
+- The word-lock bank is finite (10 clues per language), although map layouts and routes can be recombined freely.
+
+Unit and integration checks live in [tests/puzzle-workshop.test.cjs](tests/puzzle-workshop.test.cjs); they run in GitHub Actions before deployment.
+
 ## NEW: PUENTE 003 · The Village Assembly
 
 The third chapter allows students to influence what PUENTE creates **while they play**, without collecting free-text student submissions.
@@ -125,6 +167,8 @@ The public app includes no API secrets. Browser users may only reach room operat
 - styles.css — responsive layout and bridge illustration
 - app.js — classroom UI, local demo, backend RPC client, homework
 - garden.js — reviewed source bank, pure recombination, bounded pack schema, local library
+- puzzle-engine.js — visual maze schema, pathfinding, mandatory locks, linked portals, canonical share packets
+- puzzle-ui.js — phone-friendly tile editor, playtest, local shelf, teacher review and level remix
 - game-lab.js — three game formats, safe Word Weave phrases, reviewed pack adaptation
 - play-modes.js — mobile radio, map and word-rotation interaction controls
 - next-game.js — optional Village Assembly voting, aggregate-only tally UI
