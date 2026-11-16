@@ -91,8 +91,16 @@ async function main(){
     await direct.locator("#workshopScreen").waitFor({state:"visible"});
     assert.match(await direct.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
     await directCtx.close();
+
+    // The fallback is one physical HTML file and must run without a web server.
+    const offlineURL="file://"+path.join(root,"showcase-offline.html");
+    const {ctx:offlineCtx,page:offline}=await openPage(offlineURL,"mobile");
+    await offline.locator("#workshopScreen").waitFor({state:"visible"});
+    assert.match(await offline.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
+    await winFromStart(offline);
+    await offlineCtx.close();
     if(errors.length)throw Error("Browser errors:\n"+errors.join("\n"));
-    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win.");
+    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win; offline HTML plays without server.");
   }finally{await browser.close();server.close();}
 }
 main().catch(err=>{console.error(err.stack||err);server.close();process.exitCode=1;});
