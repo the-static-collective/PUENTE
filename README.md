@@ -1,5 +1,26 @@
 # PUENTE — The Living Classroom
 
+Chapter 007: Teacher's Playroom — first-user invitation
+
+## FOR THE FIRST TEACHER: THE PLAYROOM
+
+**Open it directly:** https://puente.abundent.org/?studio=1
+
+The first real user is a teacher with a taste for AI. Their experience is designed as an invitation to **play before planning**, not as a dashboard or complicated AI configuration. No login or setup is needed.
+
+1. **Surprise me** rolls a funny story setting, lesson focus and a mathematically verified bilingual deduction puzzle.
+2. Turn five readable **lesson dials**: Spanish/English, four- or five-condition challenge, language-logic focus, story setting and 10/20/30-minute duration. The challenge is generated from validated rules; changing the story changes the lesson framing, not the underlying relay mechanics.
+3. **Try it as a student** launches the exact same relay puzzle learners would play. **Peek at the solution** is a separate teacher-only disclosure and is never included in the student's challenge link.
+4. The studio makes an inspectable lesson card with learning objective, intercepted instructions, suggested activity timing, discussion questions, teacher answer and student link. Teachers may add their own notes, print the card, copy it or keep it in a local idea shelf.
+5. **Copy prompt for Chitty** creates a complete, editable prompt to paste into the teacher's existing ChatGPT conversation. It includes exact constraints and a teacher-only solution so that creative storyboarding can happen **without changing the mathematically valid game**. The teacher must check AI output. No ChatGPT account is connected to the site.
+6. Kept lessons can be reopened. Their browser-only notes are not uploaded or included in student puzzle links. The local library holds at most 16 saved ideas.
+
+The open-ended social goal is that the teacher enjoys trying combinations and starts designing better lessons organically. **We have not yet tested this with the actual teacher** and don't infer interest from age or AI familiarity.
+
+The Playroom and game run offline via the site's downloadable single-file showcase. The actual multiplayer classroom remains separately gated by the dedicated backend.
+
+**Code:** [studio-engine.js](studio-engine.js) / [studio-ui.js](studio-ui.js). **Tests:** [tests/studio.test.cjs](tests/studio.test.cjs), plus a real Chromium teacher → student → lesson-shelf walkthrough before deploying.
+
 Chapter 001: The Broken Bridge / El Puente Roto
 
 ## NEW: PUENTE 005 · Operation Signal Heist (high-school challenge)
