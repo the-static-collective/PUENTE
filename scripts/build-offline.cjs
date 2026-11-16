@@ -11,21 +11,21 @@ html=html.replace('<link rel="stylesheet" href="./styles.css">',"<style>\n"+css+
 const icon=Buffer.from(file("favicon.svg"),"utf8").toString("base64");
 html=html.replace('href="./favicon.svg"','href="data:image/svg+xml;base64,'+icon+'"');
 html=html.replace('<main>','<main><p class="offline-banner">OFFLINE SHOWCASE · Play and edit without Wi-Fi. Classroom rooms and published links need an internet connection.</p>');
-const names=["config.js","garden.js","game-lab.js","play-modes.js","next-game.js","garden-ui.js","puzzle-engine.js","puzzle-ui.js","app.js"];
+const names=["config.js","garden.js","game-lab.js","play-modes.js","next-game.js","garden-ui.js","puzzle-engine.js","puzzle-ui.js","protocol-engine.js","protocol-ui.js","app.js"];
 for(const name of names){
   let code=file(name);
   if(code.includes("</script>"))throw Error("Unsafe inline script closing sequence in "+name);
   if(name==="puzzle-ui.js"){
     const old='if(params.has("try")&&!draft&&!player)startDemo();';
     if(!code.includes(old))throw Error("Can't find Puzzle Workshop's demo startup");
-    code=code.replace(old,'if((params.has("try") || root.location.pathname.endsWith("/showcase-offline.html"))&&!draft&&!player)startDemo();');
+    code=code.replace(old,'if(params.has("try")&&!draft&&!player)startDemo();');
     code=code.replace('const data=P.encode(pack),url=new URL(root.location.href);',
       'const data=P.encode(pack),url=new URL(root.location.protocol==="file:"?"https://puente.abundent.org/":root.location.href);');
   }
   if(name==="app.js"){
-    const old="else if(url.searchParams.has('workshop')||url.searchParams.has('try')";
-    if(!code.includes(old))throw Error("Can't find workshop deep link");
-    code=code.replace(old,"else if(location.pathname.endsWith('/showcase-offline.html')||url.searchParams.has('workshop')||url.searchParams.has('try')");
+    const old="else if(url.searchParams.has('protocol'))showScreen('protocol');";
+    if(!code.includes(old))throw Error("Can't find protocol deep link");
+    code=code.replace(old,"else if(location.pathname.endsWith('/showcase-offline.html')||url.searchParams.has('protocol'))showScreen('protocol');");
   }
   const modulePart=name==="app.js"?'<script>':'<script>';
   const tag=new RegExp('<script(?: type="module")? src="\\./'+name.replace(".","\\.")+'"></script>');
