@@ -48,7 +48,7 @@ S.save(work);assert.equal(S.load().length,1,"Same puzzle must not create duplica
 assert.ok(S.load()[0].savedAt);
 assert.ok(!S.plan(work).includes("student name"),"Lesson card should not invent student identities");
 S.remove(saved);assert.equal(S.load().length,0);
-for(let i=100;i<121;i++)S.save(S.forge({rank:"starter",language:"en"},i));
+for(let i=100;i<121;i++)S.save(S.forge({rank:"starter",language:"en"},i*17000));
 assert.equal(S.load().length,16,"Only bounded local favorites retained");
 assert.equal(S.options({scene:"weird",focus:"nonexistent",minutes:999}).scene,"radio","No arbitrary HTML or theme values");
 const html=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
