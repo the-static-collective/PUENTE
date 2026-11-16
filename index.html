@@ -27,12 +27,12 @@
         <div class="hero-copy">
           <p class="eyebrow">PUENTE · THE LIVING LANGUAGE GAME</p>
           <h1 id="headline">Don't just learn<br>the words.<br><em>Build the world.</em></h1>
-          <p class="hero-text">Play a Spanish–English puzzle. Build your own level with walls, word locks and portals. Share it through a teacher, then let another student remix it.</p>
+          <p class="hero-text">Decode Spanish or English instructions. Rewire a network, prove your solution, then build challenges for other people. Not another multiple-choice quiz.</p>
           <div class="hero-actions">
-            <button class="btn primary btn-emphasis" id="goTryPuzzle" type="button">▶ Play a puzzle <span aria-hidden="true">→</span></button>
+            <button class="btn primary btn-emphasis" id="goTryPuzzle" type="button">▶ Break the network <span aria-hidden="true">→</span></button>
             <button class="btn outlined" id="goBuildPuzzle" type="button">Build a level</button>
           </div>
-          <p class="hero-proof"><span aria-hidden="true">✦</span> Ready to try · No account · No setup · About a minute</p>
+          <p class="hero-proof"><span aria-hidden="true">✦</span> Real logic puzzle · No account · No answers to guess</p>
           <button class="hero-challenge" id="goHeist" type="button"><span class="heist-tag">HARD MODE</span><span>Operation Signal Heist</span><span aria-hidden="true">↗</span></button>
           <button class="hero-text-link" id="goTeacher" type="button">Teacher? See your classroom tools →</button>
         </div>
@@ -60,6 +60,7 @@
         <div><span class="how-number">04</span><strong>Remix</strong><small>Keep the games growing</small></div>
       </section>
       <nav class="mode-nav" aria-label="Ways to play">
+        <button class="mode" type="button" data-screen="protocol" aria-pressed="false">00 / Relay Protocol</button>
         <button class="mode active" type="button" data-screen="teacher" aria-pressed="true">01 / Teacher's desk</button>
         <button class="mode" type="button" data-screen="student" aria-pressed="false">02 / Student portal</button>
         <button class="mode" type="button" data-screen="practice" aria-pressed="false">03 / Homework quest</button>
@@ -68,6 +69,73 @@
       </nav>
 
       <div class="workspace">
+        <section id="protocolScreen" class="screen" hidden aria-labelledby="protocolHeading">
+          <div class="section-heading protocol-section-head">
+            <div><p class="eyebrow">THE RELAY PROTOCOL / INTERCEPT 01</p><h2 id="protocolHeading">Decode the rules. Rewire the network.</h2></div>
+            <p class="section-aside">There's exactly one configuration that works. Find it by reasoning—not by choosing an answer.</p>
+          </div>
+          <div class="protocol-intro">
+            <span class="protocol-signal">● INTERCEPT ACTIVE</span>
+            <p>You have <strong>six relays</strong> and power for only <strong>three</strong>. A signal must travel from INPUT to OUTPUT. The intercepted instructions determine which relays may be active together.</p>
+            <p>Each wrong test raises your trace. You can always retry. Find a clean solution before your classmates do.</p>
+          </div>
+          <div class="protocol-layout">
+            <section class="protocol-console" aria-label="Interactive relay network">
+              <div class="protocol-console-heading"><span>NETWORK / RELAY ARRAY</span><span id="protocolSeed">CODE —</span></div>
+              <div id="protocolStage" class="protocol-stage">
+                <svg id="protocolWires" viewBox="0 0 640 390" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+                <span class="protocol-in">INPUT <b>●</b></span>
+                <span class="protocol-out">● <b>OUTPUT</b></span>
+                <div id="protocolRelays" class="protocol-relays" role="group" aria-label="Switch six relay nodes on or off"></div>
+              </div>
+              <div class="protocol-readouts">
+                <div><span>POWER DRAW</span><strong id="protocolPower">0 / 3</strong></div>
+                <div><span>ROUTE</span><strong id="protocolRoute">DISCONNECTED</strong></div>
+                <div><span>SIGNAL TRACE</span><strong id="protocolTrace">0</strong></div>
+              </div>
+              <p class="protocol-hint">Tap relay nodes to change the circuit. Green wires carry power. The output only opens if the physical route and every intercepted condition agree.</p>
+            </section>
+            <aside class="protocol-rules-panel">
+              <div class="protocol-rules-head">
+                <div><p class="eyebrow">INTERCEPTED TRANSMISSION</p><h3>What are the rules?</h3></div>
+                <label>Language<select id="protocolLanguage" aria-label="Language of intercepted instructions">
+                  <option value="es">Español</option><option value="en">English</option>
+                </select></label>
+              </div>
+              <p class="protocol-rule-explain">These are conditional instructions, not hints about buttons. Read every statement and deduce a configuration that satisfies all of them.</p>
+              <ol id="protocolRules" class="protocol-rules"></ol>
+              <button type="button" id="protocolPulse" class="btn primary protocol-pulse">TRANSMIT CONFIGURATION →</button>
+              <p id="protocolFeedback" class="protocol-feedback" role="status" aria-live="polite">Select three relays that create a path. Then test your theory.</p>
+              <div class="protocol-aux-actions">
+                <button type="button" id="protocolClear" class="text-button">Reset switches</button>
+                <button type="button" id="protocolTeach" class="text-button">How the logic works</button>
+              </div>
+              <div id="protocolTeachPanel" class="protocol-teach" hidden>
+                <strong>Operator reference</strong>
+                <p><em>Si... entonces</em> = if... then. <em>Solo uno</em> = exactly one. <em>Por lo menos uno</em> = at least one. <em>Mismo estado</em> = same state.</p>
+                <p>You are balancing two systems: a path through the physical circuit and a unique combination of logical constraints. The game verifies both.</p>
+              </div>
+            </aside>
+          </div>
+          <div id="protocolWin" class="protocol-win" hidden>
+            <p class="eyebrow">NETWORK UNLOCKED / NO MULTIPLE CHOICE INVOLVED</p>
+            <h3>Access granted. Your solution holds.</h3>
+            <p id="protocolWinReport"></p>
+            <div class="action-row">
+              <button id="protocolNext" class="btn primary" type="button">Forge the next challenge →</button>
+              <button id="protocolReplay" class="btn outlined" type="button">Beat your run</button>
+            </div>
+          </div>
+          <div class="protocol-share">
+            <div><p class="eyebrow">MAKE THE NEXT GAME</p><h3>Challenge somebody else.</h3>
+              <p>Every challenge code creates a different, uniquely solvable network. Share a link for practice, or forge another challenge. No student names or answers are sent anywhere.</p></div>
+            <div class="protocol-share-controls">
+              <label>Challenge link<input type="text" id="protocolShareLink" readonly aria-label="Shareable relay puzzle link"></label>
+              <div class="action-row"><button id="protocolCopy" class="btn outlined small" type="button">Copy challenge</button>
+                <button id="protocolNew" class="btn outlined small" type="button">Generate another</button></div>
+            </div>
+          </div>
+        </section>
         <section id="teacherScreen" class="screen" aria-labelledby="teacherHeading">
           <div class="section-heading"><div><p class="eyebrow">FOR THE GUIDE</p><h2 id="teacherHeading">Teacher's desk</h2></div><p class="section-aside">Create a room, project the bridge, and lead the adventure.</p></div>
 
@@ -345,6 +413,8 @@
   <script src="./garden-ui.js"></script>
   <script src="./puzzle-engine.js"></script>
   <script src="./puzzle-ui.js"></script>
+  <script src="./protocol-engine.js"></script>
+  <script src="./protocol-ui.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
