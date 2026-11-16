@@ -27,6 +27,20 @@ jobs:
         run: |
           node tests/quest-garden.test.cjs
           node tests/puzzle-workshop.test.cjs
+      - name: Install headless browser for a real human-flow test
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Smoke-test the first impression and teacher handoff
+        run: node tests/browser-showcase.cjs
+      - name: Upload visual QA captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: puente-showcase-qa
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
