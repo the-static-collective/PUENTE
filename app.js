@@ -3,6 +3,8 @@
 const $ = (id) => document.getElementById(id);
 const config = window.PUENTE_CONFIG || {};
 const gardenUI = window.PuenteGardenUI;
+const assembly = window.PuenteAssembly;
+const playModes = window.PuentePlayModes;
 const languages = {
   es: [
     {prompt:'A sign reads “La biblioteca está cerca del parque.” Where is the library?', choices:['Near the park','Behind the school','Across the river'], correct:0, explanation:'“Cerca de” means “near.” The library is near the park.'},
@@ -54,7 +56,7 @@ function writeDemo(room){localStorage.setItem('puente.room.'+room.code,JSON.stri
 const demo = {
   create(language,pack=null) {
     const code='D'+crypto.getRandomValues(new Uint32Array(1))[0].toString(16).toUpperCase().padStart(8,'0').slice(0,7);
-    const room={code,language,pack:pack?window.PuenteGarden.validate(pack):null,status:'lobby',step:0,players:[],submissions:[],created:Date.now()};
+    const room={code,language,pack:pack?window.PuenteGarden.validate(pack):null,design_votes:[],status:'lobby',step:0,players:[],submissions:[],created:Date.now()};
     writeDemo(room);return code;
   },
   join(code,alias) {
@@ -81,6 +83,19 @@ const demo = {
     r.submissions.push({step:r.step,alias,choice,correct:choice===q.correct});
     writeDemo(r);return {accepted:true};
   },
+  vote(code,alias,world,mode) {
+    const r=readDemo(code);if(!r)throw Error('Classroom not found.');
+    if(!r.players.includes(alias))throw Error('Join this classroom first.');
+    if(r.status==='finished')throw Error('The class has finished. Voting is closed.');
+    const cleared=new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size;
+    if(cleared<3)throw Error('Restore three bridge pieces before voting.');
+    if(!Number.isInteger(world)||world<0||world>2||!Number.isInteger(mode)||mode<0||mode>2)throw Error('Invalid game vote.');
+    r.design_votes=r.design_votes||[];
+    const existing=r.design_votes.find(v=>v.alias===alias);
+    if(existing){existing.world=world;existing.mode=mode;}
+    else r.design_votes.push({alias,world,mode});
+    writeDemo(r);return {accepted:true};
+  },
   snapshot(code,role,alias) {
     const r=readDemo(code);if(!r)throw Error('Room not found.');
     if(Date.now()-r.created>12*3600*1000)throw Error('Room has expired.');
@@ -88,7 +103,12 @@ const demo = {
     const q=r.step>0?(r.pack?r.pack.questions[r.step-1]:languages[r.language][r.step-1]):null;
     const answers=r.submissions.filter(s=>s.step===r.step);
     const mine=answers.find(s=>s.alias===alias);
-    return {code:r.code,language:r.language,pack_title:r.pack?r.pack.title:'The Broken Bridge',status:r.status,step:r.step,total:r.pack?r.pack.questions.length:6,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,topic:q.topic||(['direction','greeting','market','time','conversation','conversation'][r.step-1]||'mixed'),mechanic:q.mechanic||'decode',correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
+    const votes=r.design_votes||[];
+    const counts={world:[0,0,0],mode:[0,0,0]};
+    votes.forEach(v=>{if(v.world>=0&&v.world<=2)counts.world[v.world]++;if(v.mode>=0&&v.mode<=2)counts.mode[v.mode]++;});
+    const myDesign=votes.find(v=>v.alias===alias);
+
+    return {code:r.code,language:r.language,pack_title:r.pack?r.pack.title:'The Broken Bridge',status:r.status,step:r.step,total:r.pack?r.pack.questions.length:6,design_enabled:true,design_counts:role==='teacher'?counts:null,my_design:role==='student'&&myDesign?{world:myDesign.world,mode:myDesign.mode}:null,cleared:new Set(r.submissions.filter(s=>s.correct).map(s=>s.step)).size,round_correct:answers.filter(s=>s.correct).length,players:r.players.map(a=>({alias:a,score:r.submissions.filter(s=>s.alias===a&&s.correct).length})),responses:answers.length,my_choice:mine?mine.choice:null,question:q?{prompt:q.prompt,choices:q.choices,topic:q.topic||(['direction','greeting','market','time','conversation','conversation'][r.step-1]||'mixed'),mechanic:q.mechanic||'decode',correct_choice:['reveal','finished'].includes(r.status)?q.correct:null,explanation:['reveal','finished'].includes(r.status)?q.explanation:null}:null};
   },
   simulate(code) {
     const r=readDemo(code);if(!r) return;
@@ -160,6 +180,15 @@ async function advance() {
   try{if(useLive)await callRpc('puente_advance_room',{p_code:session.code});else demo.advance(session.code);await refresh();}
   catch(err){notice(err.message,true);}finally{busy=false;$('advanceRoom').disabled=false;}
 }
+async function voteNext(world,mode){
+  if(session.role!=='student'||busy)return;
+  busy=true;
+  try {
+    if(useLive)await callRpc('puente_cast_next_game_vote',{p_code:session.code,p_world:world,p_mode:mode});
+    else demo.vote(session.code,session.alias,world,mode);
+    await refresh();
+  }finally{busy=false;}
+}
 async function answer(choice) {
   if(busy||session.role!=='student'||!snapshot||snapshot.status!=='question')return;
   busy=true;
@@ -204,6 +233,7 @@ function renderTeacher(s) {
   if(s.status==='reveal')$('revealBox').textContent=(s.round_correct>0?'BRIDGE PIECE RESTORED · ':'NOT YET RESTORED · Talk it through, then retry. ')+'WHY IT WORKS · '+s.question.explanation;
   $('advanceRoom').textContent=({lobby:'Begin adventure →',question:'Reveal answer →',reveal:s.round_correct===0?'Retry this challenge →':s.step===s.total?'Finish the bridge →':'Next challenge →',finished:'Adventure complete'})[s.status];
   $('advanceRoom').disabled=s.status==='finished';
+  assembly.teacher($('teacherAssembly'),s);
 }
 function renderStudent(s) {
   $('studentRound').textContent=s.status==='lobby'?'PROLOGUE':s.status==='finished'?'EPILOGUE':'CHALLENGE '+s.step+' / '+s.total;
@@ -221,7 +251,18 @@ function renderStudent(s) {
     else {f.textContent='Choose one answer. You get one attempt per challenge.';f.className='feedback info';}
   }
   const q=s.question;
-  buildChoices($('studentChoices'),q?.choices,s.status==='question'&&s.my_choice===null?answer:null,s.my_choice,s.status==='reveal'?q.correct_choice:null,s.status!=='question'||s.my_choice!==null);
+  const choiceBox=$('studentChoices');
+  const novel=s.pack_title&&s.pack_title!=='The Broken Bridge';
+  const handled=novel&&playModes.render(choiceBox,q,{
+    key:s.code+':'+s.step,answer,mine:s.my_choice,
+    correct:s.status==='reveal'&&q?q.correct_choice:null,
+    locked:s.status!=='question'||s.my_choice!==null
+  });
+  if(!handled){
+    choiceBox.className='choices';
+    buildChoices(choiceBox,q?.choices,s.status==='question'&&s.my_choice===null?answer:null,s.my_choice,s.status==='reveal'&&q?q.correct_choice:null,s.status!=='question'||s.my_choice!==null);
+  }
+  assembly.display($('studentAssembly'),s,voteNext);
 }
 function resetSession(){
   stopPolling();sessionStorage.removeItem('puente.session');session={code:'',role:'',alias:''};snapshot=null;
@@ -241,17 +282,31 @@ function renderPractice(){
   $('practiceRestart').hidden=!done;
   if(done){$('practicePrompt').textContent='The clockmaker has what they need.';$('practiceChoices').replaceChildren();$('practiceFeedback').textContent='You answered '+practice.score+' of 5 correctly. Try again any time — your answers stay on this device.';return;}
   const q=bank[practice.index];$('practicePrompt').textContent=q.prompt;
-  buildChoices($('practiceChoices'),q.choices,practice.answered?null:choosePractice,null,practice.answered?q.correct:null,practice.answered);
+  const practiceBox=$('practiceChoices');
+  const used=!!custom&&playModes.render(practiceBox,q,{
+    key:'practice:'+practice.language+':'+practice.index,answer:choosePractice,
+    mine:practice.answered?practice.selectedChoice:null,
+    correct:practice.answered?q.correct:null,locked:practice.answered
+  });
+  if(!used){
+    practiceBox.className='choices';
+    buildChoices(practiceBox,q.choices,practice.answered?null:choosePractice,practice.answered?practice.selectedChoice:null,practice.answered?q.correct:null,practice.answered);
+  }
   if(!practice.answered)$('practiceFeedback').textContent='';
 }
 function choosePractice(i){
   if(practice.answered)return;
   const custom=gardenUI.practicePack();const bank=custom&&custom.language===practice.language?custom.questions:languages[practice.language];
   const q=bank[practice.index];
-  practice.answered=true;if(i===q.correct)practice.score++;
+  practice.answered=true;practice.selectedChoice=i;if(i===q.correct)practice.score++;
   $('practiceFeedback').textContent=(i===q.correct?'Correct. ':'Not quite. ')+q.explanation;
   $('practiceFeedback').className='feedback '+(i===q.correct?'':'error');
-  buildChoices($('practiceChoices'),q.choices,null,i,q.correct,true);
+  const active=gardenUI.practicePack();
+  const used=!!active&&active.language===practice.language&&playModes.render($('practiceChoices'),q,{
+    key:'practice:'+practice.language+':'+practice.index,answer:()=>{},
+    mine:i,correct:q.correct,locked:true
+  });
+  if(!used){$('practiceChoices').className='choices';buildChoices($('practiceChoices'),q.choices,null,i,q.correct,true);}
   $('practiceScore').textContent=practice.score+' correct';
   $('practiceProgress').style.width=(100*(practice.index+1)/5)+'%';
   $('practiceNext').hidden=false;
@@ -274,7 +329,7 @@ function init(){
   $('leaveStudent').addEventListener('click',resetSession);
   $('simulatePlayer').addEventListener('click',async()=>{if(useLive)return;demo.simulate(session.code);await refresh();});
   $('practiceLanguage').addEventListener('change',()=>{practice={language:$('practiceLanguage').value,index:0,score:0,answered:false};renderPractice();});
-  $('practiceNext').addEventListener('click',()=>{practice.index++;practice.answered=false;renderPractice();});
+  $('practiceNext').addEventListener('click',()=>{practice.index++;practice.answered=false;practice.selectedChoice=null;renderPractice();});
   $('practiceRestart').addEventListener('click',()=>{practice={language:$('practiceLanguage').value,index:0,score:0,answered:false};renderPractice();});
   window.addEventListener('storage',e=>{if(session.code&&e.key==='puente.room.'+session.code&&!useLive)refresh();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&session.code)refresh();});
