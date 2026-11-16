@@ -48,6 +48,29 @@ async function main(){
     const {ctx:studentCtx,page:student}=await openPage(base+"/");
     assert.equal(await student.title(),"PUENTE — Play. Build. Remix.");
     await student.locator("#goTryPuzzle").click();
+    await student.locator("#protocolScreen").waitFor({state:"visible"});
+    assert.equal(await student.locator("#protocolRelays .protocol-node").count(),6);
+    assert.ok(await student.locator("#protocolPulse").isDisabled(),"Physical route must be ready before transmitting.");
+    const relayState=await student.evaluate(()=>{
+      const G=window.PuenteProtocol,p=G.generate(2707,"es");
+      return {answer:p.solution,bad:G.BASE.find(n=>n!==p.solution)};
+    });
+    for(let i=0;i<6;i++)if((relayState.bad>>i)&1)
+      await student.locator('#protocolRelays [data-relay="'+String.fromCharCode(65+i)+'"]').click();
+    assert.equal(await student.locator("#protocolPower").innerText(),"3 / 3");
+    await student.locator("#protocolPulse").click();
+    assert.match(await student.locator("#protocolFeedback").innerText(),/REJECTED/i);
+    for(let i=0;i<6;i++)if(((relayState.bad>>i)&1)!==((relayState.answer>>i)&1))
+      await student.locator('#protocolRelays [data-relay="'+String.fromCharCode(65+i)+'"]').click();
+    assert.equal(await student.locator("#protocolRoute").innerText(),"ROUTE LIVE");
+    await student.locator("#protocolPulse").click();
+    await student.locator("#protocolWin").waitFor({state:"visible"});
+    assert.match(await student.locator("#protocolWinReport").innerText(),/SIGNAL OPERATOR/);
+    assert.ok((await student.locator("#protocolShareLink").inputValue()).includes("protocol="));
+    await student.screenshot({path:path.join(root,"artifacts","relay-mobile.png"),fullPage:false});
+    await student.locator("#protocolNext").click();
+    await student.locator("#protocolWin").waitFor({state:"hidden"});
+    await student.goto(base+"/?try=1");
     await student.locator("#workshopScreen").waitFor({state:"visible"});
     assert.equal(await student.locator("#puzzleGrid .puzzle-cell").count(),48);
     assert.match(await student.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
@@ -132,12 +155,16 @@ async function main(){
     // The fallback is one physical HTML file and must run without a web server.
     const offlineURL="file://"+path.join(root,"showcase-offline.html");
     const {ctx:offlineCtx,page:offline}=await openPage(offlineURL,"mobile");
-    await offline.locator("#workshopScreen").waitFor({state:"visible"});
-    assert.match(await offline.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
-    await winFromStart(offline);
+    await offline.locator("#protocolScreen").waitFor({state:"visible"});
+    const offlineAnswer=await offline.evaluate(()=>window.PuenteProtocol.generate(2707,"es").solution);
+    for(let i=0;i<6;i++)if((offlineAnswer>>i)&1)
+      await offline.locator('#protocolRelays [data-relay="'+String.fromCharCode(65+i)+'"]').click();
+    await offline.locator("#protocolPulse").click();
+    await offline.locator("#protocolWin").waitFor({state:"visible"});
+    assert.match(await offline.locator("#protocolWinReport").innerText(),/PERFECT DECODE/);
     await offlineCtx.close();
     if(errors.length)throw Error("Browser errors:\n"+errors.join("\n"));
-    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win; offline HTML plays without server; high-school typed-grammar heist and fragment extraction work.");
+    console.log("SHOWCASE SMOKE PASS: actual relay deduction, failed pulse, unique winning route, procedural challenge, legacy map remix/teacher workflow, heist and offline relay.");
   }finally{await browser.close();server.close();}
 }
 main().catch(err=>{console.error(err.stack||err);server.close();process.exitCode=1;});
