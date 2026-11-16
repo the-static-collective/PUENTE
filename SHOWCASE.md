@@ -5,6 +5,23 @@
 **Skip straight to map editor:** https://puente.abundent.org/?workshop=1  
 **Offline backup:** https://puente.abundent.org/showcase-offline.html (save a copy in advance).  
 
+## High-school alternative: Operation Signal Heist
+
+**Direct link:** https://puente.abundent.org/?heist=1
+
+When showing this to high-school students or a secondary language teacher, the stronger opener is the **Signal Heist**. The mission is a small, navigable grammar-escape level: recover two encrypted signal fragments, cross an optional portal, and use advanced forms to open the extraction route. It contains three mandatory grammar gates and one optional shortcut lock. The three required gates are **typed**, not multiple-choice.
+
+**Recommended hook:** "This isn't a vocabulary quiz. The exit won't open until you've hacked the grammar locks and recovered both signals. Find a faster route than I did."
+
+For a quick guided tour in Spanish mode:
+1. From START, go right, then up. Type **se habían ido** (accentless *se habian ido* is also accepted).
+2. Go up to collect X; down twice, left, then down onto the portal.
+3. Go down, then right. Type **sepa** to unlock the lower signal branch.
+4. Go down to collect Y, up, right, then up. Type **por eso**.
+5. Go up to reach EXIT. After the win, inspect the **personal best** and theoretical shortest route. Click **Remix this level** to expose the editor and challenge someone to improve it.
+
+The prototype's difficulty is intentionally an **opt-in second tier**; the original `/?try=1` warm-up remains accessible for an unfamiliar adult viewer or a lower-proficiency classroom. An adult language teacher should review the grammar prompts before student use.
+
 ## The one sentence
 
 **"The students don't just answer language questions—they build little games that teach the next students."**
