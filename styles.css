@@ -199,3 +199,7 @@ textarea{width:100%;min-width:0;padding:14px 15px;border:1px solid #c9d7d1;borde
 .cipher-submit{min-height:50px;align-self:stretch}
 .cipher-hint{min-height:40px;align-self:flex-start;font-size:12px}
 .cipher-form .help{margin:0;font-size:12px;line-height:1.6}
+
+/* Phone-native heist: swipes steer the character; scrolling resumes outside the map. */
+.puzzle-grid[data-mode="play"],.puzzle-grid[data-mode="test"]{touch-action:none;overscroll-behavior:contain}
+.puzzle-grid[data-mode="play"] .puzzle-cell,.puzzle-grid[data-mode="test"] .puzzle-cell{cursor:pointer}
