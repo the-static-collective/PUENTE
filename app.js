@@ -33,7 +33,7 @@ let practice = {language:'es',index:0,score:0,answered:false};
 const normalizeCode = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
 const notice = (msg, error=false) => {const n=$('appNotice'); n.textContent=msg;n.classList.toggle('error',error);};
 function showScreen(name) {
-  for(const id of ['protocol','teacher','student','practice','garden','workshop']) $(id+'Screen').hidden = (id!==name);
+  for(const id of ['studio','protocol','teacher','student','practice','garden','workshop']) $(id+'Screen').hidden = (id!==name);
   document.querySelectorAll('.mode').forEach(b=>{const active=b.dataset.screen===name;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
   if(name==='practice') renderPractice();
   const section=$(name+'Screen');
@@ -326,8 +326,10 @@ function init(){
   gardenUI.init();
   window.PuentePuzzleUI.init();
   window.PuenteProtocolUI.init();
+  window.PuenteStudioUI.init();
   document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
   $('goTeacher').addEventListener('click',()=>showScreen('teacher'));
+  $('goStudio').addEventListener('click',()=>showScreen('studio'));
   $('goTryPuzzle').addEventListener('click',()=>{
     window.PuenteProtocolUI.load(1001,'es');showScreen('protocol');
   });
@@ -352,6 +354,7 @@ function init(){
   const url=new URL(location.href),join=url.searchParams.get('join');
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
   else if(url.searchParams.has('homework')||url.searchParams.has('practicePack'))showScreen('practice');
+  else if(url.searchParams.has('studio'))showScreen('studio');
   else if(url.searchParams.has('protocol'))showScreen('protocol');
   else if(url.searchParams.has('workshop')||url.searchParams.has('try')||url.searchParams.has('heist')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
   practice.language=$('practiceLanguage').value;
@@ -359,7 +362,7 @@ function init(){
   connect().then(async()=>{
     try {
       const saved=JSON.parse(sessionStorage.getItem('puente.session')||'null');
-      if(!['protocol','workshop','try','heist','puzzleDraft','puzzle','homework','practicePack'].some(k=>url.searchParams.has(k)) && saved&&saved.code&&['teacher','student'].includes(saved.role)){
+      if(!['studio','protocol','workshop','try','heist','puzzleDraft','puzzle','homework','practicePack'].some(k=>url.searchParams.has(k)) && saved&&saved.code&&['teacher','student'].includes(saved.role)){
         session=saved;
         if(saved.role==='teacher'){$('createPanel').hidden=true;$('teacherRoom').hidden=false;showScreen('teacher');}
         else {$('joinForm').hidden=true;$('studentRoom').hidden=false;showScreen('student');}
