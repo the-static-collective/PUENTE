@@ -25,7 +25,7 @@
     ]
   };
   // The Bank's English/Spanish targets must match exactly, not approximate.
-  FORGE_BANK.es[1]=["objects","Build the sentence meaning “The door opens.”",["La","puerta","abre."],"“La puerta abre” means “The door opens.”"];
+  FORGE_BANK.es[1]=["objects","Build the sentence meaning “The cat sleeps.”",["El","gato","duerme."],"“El gato duerme” means “The cat sleeps.”"];
   FORGE_BANK.es[2]=["conversation","Build the sentence meaning “We are very ready.”",["Estamos","muy","listos."],"“Estamos muy listos” means “We are very ready.”"];
   FORGE_BANK.es[3]=["objects","Build the sentence meaning “I have the bread.”",["Tengo","el","pan."],"“Tengo el pan” means “I have the bread.”"];
   FORGE_BANK.en[1]=["objects","Build the sentence meaning “Las puertas están abiertas.”",["Doors","are","open."],"“Doors are open” means “Las puertas están abiertas.”"];
