@@ -327,7 +327,12 @@ function init(){
   window.PuentePuzzleUI.init();
   document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
   $('goTeacher').addEventListener('click',()=>showScreen('teacher'));
-  $('goStudent').addEventListener('click',()=>showScreen('student'));
+  $('goTryPuzzle').addEventListener('click',()=>{
+    window.PuentePuzzleUI.startDemo();showScreen('workshop');
+  });
+  $('goBuildPuzzle').addEventListener('click',()=>{
+    window.PuentePuzzleUI.openBuilder();showScreen('workshop');
+  });
   $('createRoom').addEventListener('click',createRoom);
   $('joinForm').addEventListener('submit',joinRoom);
   $('advanceRoom').addEventListener('click',advance);
@@ -343,13 +348,13 @@ function init(){
   const url=new URL(location.href),join=url.searchParams.get('join');
   if(join){$('joinCode').value=normalizeCode(join);showScreen('student');}
   else if(url.searchParams.has('homework')||url.searchParams.has('practicePack'))showScreen('practice');
-  else if(url.searchParams.has('workshop')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
+  else if(url.searchParams.has('workshop')||url.searchParams.has('try')||url.searchParams.has('puzzleDraft')||url.searchParams.has('puzzle'))showScreen('workshop');
   practice.language=$('practiceLanguage').value;
   renderPractice();
   connect().then(async()=>{
     try {
       const saved=JSON.parse(sessionStorage.getItem('puente.session')||'null');
-      if(saved&&saved.code&&['teacher','student'].includes(saved.role)){
+      if(!['workshop','try','puzzleDraft','puzzle','homework','practicePack'].some(k=>url.searchParams.has(k)) && saved&&saved.code&&['teacher','student'].includes(saved.role)){
         session=saved;
         if(saved.role==='teacher'){$('createPanel').hidden=true;$('teacherRoom').hidden=false;showScreen('teacher');}
         else {$('joinForm').hidden=true;$('studentRoom').hidden=false;showScreen('student');}
