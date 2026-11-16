@@ -7,6 +7,7 @@ const $=id=>document.getElementById(id);
 const STORAGE="puente.puzzle.library.v1",MAX_SHELF=18;
 let board=P.sample("es"),mode="build",brush="#",undo=[],redo=[],run=null;
 let review=false,approvedView=false,passedHash="",currentLink="",lastStatus="";
+let lastSwipeAt=0;
 const el=(tag,cls,text)=>{
   const e=document.createElement(tag);
   if(cls)e.className=cls;
@@ -126,7 +127,16 @@ function gridCell(t,i){
   cell.setAttribute("aria-label","Row "+(y+1)+", column "+(x+1)+": "+name+(here?" — explorer here":""));
   if(mode==="build"){cell.addEventListener("click",()=>paint(i));
     cell.addEventListener("pointerenter",e=>{if(e.buttons===1&&(brush==="#"||brush==="."))paint(i);});
-  }else cell.disabled=true;
+  }else{
+    // The map itself is a touch controller. Tapping the next tile moves,
+    // while clicking faraway tiles does not teleport or reveal a shortcut.
+    cell.tabIndex=-1;
+    cell.addEventListener("click",()=>{
+      if(!run||run.won||run.pending!==null||Date.now()-lastSwipeAt<350)return;
+      const from=P.xy(run.pos),to=P.xy(i),dx=to.x-from.x,dy=to.y-from.y;
+      if(Math.abs(dx)+Math.abs(dy)===1)handleMove(dx,dy);
+    });
+  }
   return cell;
 }
 function renderGrid(){
@@ -160,7 +170,7 @@ function renderMode(){
     $("puzzleBestRun").textContent=run.won?bestRunText(run):"";
     $("puzzlePlayBrief").textContent=isHeist()
       ?"Intercepted transmission. Recover BOTH signal fragments, breach the grammar locks and escape. Purple portals can shorten the route—or send you backward. No timer; think through the map."
-      :"Find the exit. Use the arrow buttons or keyboard. Word locks ask language questions. Purple portals move you across the map.";
+      :"Find the exit. Swipe, tap the next tile, or use arrow buttons. Language locks and purple portals change the route.";
   }
   const hasFragments=isHeist();
   $("puzzleObjective").hidden=!testing||!hasFragments;
@@ -406,6 +416,22 @@ function init(){
   document.querySelectorAll("[data-move]").forEach(button=>button.addEventListener("click",()=>{
     const [dx,dy]=button.dataset.move.split(",").map(Number);handleMove(dx,dy);
   }));
+  const grid=$("puzzleGrid");
+  let gesture=null;
+  grid.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse"||!run||run.won||run.pending!==null||!["play","test"].includes(mode))return;
+    gesture={x:e.clientX,y:e.clientY,id:e.pointerId};
+  });
+  grid.addEventListener("pointerup",e=>{
+    if(!gesture||e.pointerId!==gesture.id)return;
+    const deltaX=e.clientX-gesture.x,deltaY=e.clientY-gesture.y;
+    gesture=null;
+    if(Math.max(Math.abs(deltaX),Math.abs(deltaY))<24)return;
+    lastSwipeAt=Date.now();
+    if(Math.abs(deltaX)>Math.abs(deltaY))handleMove(Math.sign(deltaX),0);
+    else handleMove(0,Math.sign(deltaY));
+  });
+  grid.addEventListener("pointercancel",()=>{gesture=null;});
   document.addEventListener("keydown",e=>{
     if($("workshopScreen").hidden||!["play","test"].includes(mode))return;
     if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName))return;
