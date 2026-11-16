@@ -24,7 +24,9 @@ jobs:
         with:
           node-version: '22'
       - name: Verify quest generator and page wiring
-        run: node tests/quest-garden.test.cjs
+        run: |
+          node tests/quest-garden.test.cjs
+          node tests/puzzle-workshop.test.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
