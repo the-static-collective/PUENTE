@@ -1,0 +1,98 @@
+/* Reproducible public showcase smoke test: headless Chromium, two viewports.
+   No Supabase credentials, no classroom data, no calls to a live school backend. */
+"use strict";
+const {chromium}=require("playwright");
+const assert=require("node:assert/strict");
+const fs=require("node:fs");
+const path=require("node:path");
+const http=require("node:http");
+const root=path.resolve(__dirname,"..");
+const mime={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".svg":"image/svg+xml"};
+const server=http.createServer((req,res)=>{
+  const filename=decodeURIComponent(new URL(req.url,"http://localhost").pathname);
+  const p=path.resolve(root,"."+ (filename==="/"?"/index.html":filename));
+  if(!p.startsWith(root+path.sep)){res.writeHead(403).end();return;}
+  fs.readFile(p,(err,contents)=>{
+    if(err){res.writeHead(404).end();return;}
+    res.writeHead(200,{"content-type":mime[path.extname(p)]||"application/octet-stream","cache-control":"no-store"});
+    res.end(contents);
+  });
+});
+const A=async(button,n=1)=>{for(let i=0;i<n;i++)await button.click();};
+async function main(){
+  await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
+  const base="http://127.0.0.1:"+server.address().port;
+  const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
+  const errors=[];
+  async function openPage(url,device="mobile"){
+    const ctx=await browser.newContext({viewport:device==="mobile"?{width:390,height:844}:{width:1280,height:850},deviceScaleFactor:1});
+    const page=await ctx.newPage();
+    page.on("pageerror",e=>errors.push("pageerror: "+e.message));
+    page.on("console",m=>{if(m.type()==="error")errors.push("console: "+m.text());});
+    await page.goto(url,{waitUntil:"load"});
+    await page.locator("#connectionBadge").waitFor();
+    return {ctx,page};
+  }
+  async function winFromStart(page){
+    const right=page.locator('[data-move="1,0"]');
+    await A(right,2);
+    await page.locator("#puzzleLockPanel").waitFor({state:"visible"});
+    const prompt=await page.locator("#puzzleLockPrompt").innerText();
+    assert.match(prompt,/puerta|door/i,"The teaching gate should mention the door");
+    await page.locator("#puzzleLockChoices button").first().click();
+    await A(right,3);
+    await page.locator("#puzzleVictory").waitFor({state:"visible"});
+    assert.match(await page.locator("#puzzleVictoryStats").innerText(),/solved in/i);
+  }
+  try{
+    const {ctx:studentCtx,page:student}=await openPage(base+"/");
+    assert.equal(await student.title(),"PUENTE — Play. Build. Remix.");
+    await student.locator("#goTryPuzzle").click();
+    await student.locator("#workshopScreen").waitFor({state:"visible"});
+    assert.equal(await student.locator("#puzzleGrid .puzzle-cell").count(),48);
+    assert.match(await student.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
+    await winFromStart(student);
+    await student.locator("#puzzleRemix").click();
+    assert.match(await student.locator("#puzzleState").innerText(),/BUILD MODE/);
+    assert.match(await student.locator("#puzzleMapId").innerText(),/GEN 1/);
+    await student.locator("#puzzleSubmit").click();
+    const draft=await student.locator("#puzzleLink").inputValue();
+    assert.ok(draft.includes("puzzleDraft="));
+    assert.ok(draft.length<1800);
+    const overflow=await student.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+    assert.ok(overflow<=3,"Mobile homepage has horizontal overflow: "+overflow);
+    const out=path.join(root,"artifacts");fs.mkdirSync(out,{recursive:true});
+    await student.screenshot({path:path.join(out,"puzzle-mobile.png"),fullPage:false});
+    await studentCtx.close();
+
+    const reviewURL=draft.replace("https://puente.abundent.org",base).replace("https://the-static-collective.github.io/PUENTE",base);
+    const {ctx:reviewCtx,page:review}=await openPage(reviewURL,"desktop");
+    await review.locator("#workshopScreen").waitFor({state:"visible"});
+    await review.locator("#puzzleTeacherReview").waitFor({state:"visible"});
+    assert.equal(await review.locator("#puzzleReviewLocks .puzzle-review-item").count(),1);
+    await review.locator("#puzzleReviewTest").click();
+    await winFromStart(review);
+    await review.locator("#puzzleBackToEdit").click();
+    await review.locator("#puzzleReviewChecked").check();
+    assert.equal(await review.locator("#puzzleApprove").isEnabled(),true);
+    await review.locator("#puzzleApprove").click();
+    const player=await review.locator("#puzzleLink").inputValue();
+    assert.ok(player.includes("?puzzle="));
+    const playerURL=player.replace("https://puente.abundent.org",base);
+    await review.screenshot({path:path.join(out,"teacher-review-desktop.png"),fullPage:false});
+    await reviewCtx.close();
+
+    const {ctx:playCtx,page:play}=await openPage(playerURL,"mobile");
+    await play.locator("#workshopScreen").waitFor({state:"visible"});
+    await winFromStart(play);
+    await playCtx.close();
+
+    const {ctx:directCtx,page:direct}=await openPage(base+"/?try=1","mobile");
+    await direct.locator("#workshopScreen").waitFor({state:"visible"});
+    assert.match(await direct.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
+    await directCtx.close();
+    if(errors.length)throw Error("Browser errors:\n"+errors.join("\n"));
+    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win.");
+  }finally{await browser.close();server.close();}
+}
+main().catch(err=>{console.error(err.stack||err);server.close();process.exitCode=1;});
