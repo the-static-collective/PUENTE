@@ -92,11 +92,15 @@ function showTool(tool){
     b.setAttribute("aria-pressed",String(active));
   });
 }
+function invalidateLink(){
+  currentLink="";$("puzzleLink").value="";
+  $("puzzleLinkLabel").textContent="This map changed. Make a fresh handoff link after testing.";
+}
 function change(pack,message){
   const next=P.canonical(pack);
   if(JSON.stringify(next)===JSON.stringify(board))return;
   undo.push(P.clone(board));if(undo.length>50)undo.shift();
-  redo=[];board=next;passedHash="";render();
+  redo=[];board=next;passedHash="";invalidateLink();render();
   status(message||"Map updated. Test it before sharing.");
 }
 function paint(i){
@@ -221,7 +225,7 @@ function returnFromTest(){
 }
 function moveHistory(source,dest,message){
   if(!source.length)return;
-  dest.push(P.clone(board));board=source.pop();passedHash="";render();status(message);
+  dest.push(P.clone(board));board=source.pop();passedHash="";invalidateLink();render();status(message);
 }
 function makeLink(kind,pack=board){
   const data=P.encode(pack),url=new URL(root.location.href);
@@ -252,9 +256,22 @@ function approve(){
 function remix(){
   try{
     board=P.remix(board);run=null;mode="build";review=false;approvedView=false;
-    passedHash="";undo=[];redo=[];$("puzzleReviewChecked").checked=false;render();
+    passedHash="";undo=[];redo=[];$("puzzleReviewChecked").checked=false;invalidateLink();render();
     status("Remix started: this branch remembers its parent puzzle #"+board.parent+". Add a new route or word lock!");
   }catch(err){status(err.message,true);}
+}
+function startDemo(){
+  board=P.sample("es");run=null;mode="play";review=false;approvedView=false;
+  undo=[];redo=[];passedHash="";invalidateLink();
+  startRun("play");
+  status("Your one-minute mission: move RIGHT twice, decode the word lock, then follow the path to the EXIT. Try the purple portals too!");
+}
+function openBuilder(){
+  // Retain whatever level has been edited, including a finished demo level.
+  if(mode==="build")return;
+  run=null;mode="build";review=false;approvedView=false;
+  passedHash="";invalidateLink();render();
+  status("Build mode: tap Wall, Path or Word Lock, then tap tiles. Test your route when ready.");
 }
 function shelfOpenLink(){
   if(!currentLink){status("Generate a handoff or player link first.",true);return;}
@@ -307,6 +324,7 @@ function init(){
   });
   const params=new URL(root.location.href).searchParams;
   const draft=params.get("puzzleDraft"),player=params.get("puzzle");
+  if(params.has("try")&&!draft&&!player)startDemo();
   if(draft||player){
     try{
       board=P.decode(draft||player);
@@ -317,5 +335,5 @@ function init(){
   showTool(brush);renderShelf();render();
   // Page navigation to the workshop is handled by the main app after its tabs bind.
 }
-root.PuentePuzzleUI={init,remix};
+root.PuentePuzzleUI={init,remix,startDemo,openBuilder};
 })(window);
