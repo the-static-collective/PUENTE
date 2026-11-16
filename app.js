@@ -329,7 +329,7 @@ function init(){
   document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));
   $('goTeacher').addEventListener('click',()=>showScreen('teacher'));
   $('goTryPuzzle').addEventListener('click',()=>{
-    window.PuenteProtocolUI.load(2707,'es');showScreen('protocol');
+    window.PuenteProtocolUI.load(1001,'es');showScreen('protocol');
   });
   $('goHeist').addEventListener('click',()=>{
     window.PuentePuzzleUI.startHeist();showScreen('workshop');
