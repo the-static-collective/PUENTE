@@ -39,6 +39,24 @@ After solving, click **Forge the next challenge**. Every generated code gives a 
 
 **For the teacher:** this is a 4–5-minute interpret-and-reason activity, not an engagement claim. The level builder and its supervised share-and-remix links remain a second demonstration; the previous single-gate maze is a beginner warm-up, not the main pitch.
 
+## FIRST ACTUAL USER: LET THE TEACHER HAVE FUN
+
+**Teacher-first link:** https://puente.abundent.org/?studio=1
+
+Rather than send a new teacher directly into a classroom room-code dashboard or a pile of student puzzles, invite them to **Teacher's Playroom** and hand them control.
+
+**The 90-second tour:**
+
+1. **Surprise me.** A whimsical mission appears, grounded in a real unique-solution network puzzle.
+2. **Turn a dial.** Change the setting to "Department of Unnecessary Emergencies"; change the language or target "If this, then that." The mission and intercepted instructions update.
+3. **Try it as a student.** Play the relay control desk before seeing the answer.
+4. **Peek, keep, print.** Reveal the teacher-only winning configuration and see the lesson goal, timing and debrief prompts. Save the good experiments in the local shelf.
+5. **Invite Chitty Chitty Bang Bang.** "Copy prompt for Chitty" sends **nothing automatically**. The teacher pastes a precise puzzle brief into their existing ChatGPT to riff on hooks, scaffolds, and classroom questions.
+
+**One-question feedback test:** "Did you find yourself wanting to make another one?" Then ask whether the activity fits any unit they're actually teaching. That answer matters more than clicks.
+
+**Boundary:** Chitty isn't integrated; it is a manual copy-paste workflow. Notes are local unless voluntarily copied. Only the teacher controls distribution of student challenge links. We haven't observed teacher usability or learning outcomes yet.
+
 ## The one sentence
 
 **"The students don't just answer language questions—they build little games that teach the next students."**
