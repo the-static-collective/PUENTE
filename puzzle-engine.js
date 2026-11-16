@@ -81,7 +81,7 @@ function sample(language="es"){
 // Signal Heist: recover two fragments before extraction. One route through
 // the central gate; a portal offers an alternative but never skips the clues.
 function heist(language="es"){
-  const rows=["########","##X###E#","##k#Q#.#","#S.m.l.#","#P.##Y##","########"];
+  const rows=["########","##X###E#","##k#Q#n#","#S.m.l.#","#P.##Y##","########"];
   return validate({...empty({language,theme:"observatory"}),tiles:rows.join("")});
 }
 function canonical(raw){
