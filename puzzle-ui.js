@@ -23,6 +23,8 @@ const labelTile=(t)=>{
   if(t==="E")return ["⚑","Exit"];
   if(t==="P")return ["A","Portal A"];
   if(t==="Q")return ["B","Portal B"];
+  if(t==="X")return ["◈","Signal fragment A"];
+  if(t==="Y")return ["◈","Signal fragment B"];
   if(P.isGate(t))return ["◆","Language lock "+(t.charCodeAt(0)-96)];
   return ["·","Clear floor"];
 };
@@ -79,10 +81,14 @@ function renderShelf(){
 function updateClues(){
   const select=$("puzzleClue"),prev=select.value;
   select.replaceChildren();
+  const basic=document.createElement("optgroup");basic.label="FOUNDATIONS · A–J";
+  const advanced=document.createElement("optgroup");advanced.label="ADVANCED · K–T";
   P.PHRASES[board.language].forEach((q,i)=>{
     const o=document.createElement("option");o.value=String(i);
-    o.textContent=(i+1)+". "+q[0];select.append(o);
+    o.textContent=(i>=10?"ADV ":"BASIC ")+(i+1)+". "+q[0];
+    (i<10?basic:advanced).append(o);
   });
+  select.append(basic,advanced);
   if([...select.options].some(o=>o.value===prev))select.value=prev;
 }
 function showTool(tool){
@@ -115,6 +121,7 @@ function gridCell(t,i){
   const {x,y}=P.xy(i),here=run&&run.pos===i;
   if(here&&mode!=="build"){cell.textContent="●";cell.classList.add("player");}
   if(run?.unlocked.includes(i))cell.classList.add("solved");
+  if(P.isFragment(t)&&run?.collected.includes(t)){cell.classList.add("collected");if(!here)cell.textContent="✓";}
   cell.setAttribute("aria-label","Row "+(y+1)+", column "+(x+1)+": "+name+(here?" — explorer here":""));
   if(mode==="build"){cell.addEventListener("click",()=>paint(i));
     cell.addEventListener("pointerenter",e=>{if(e.buttons===1&&(brush==="#"||brush==="."))paint(i);});
@@ -132,8 +139,8 @@ function renderMode(){
   const testing=mode==="test"||mode==="play";
   $("puzzleEditorPanel").hidden=testing||mode==="review";
   $("puzzlePlayPanel").hidden=!testing;
-  $("puzzleMoveControls").hidden=!testing||Boolean(run?.pending)||Boolean(run?.won);
-  $("puzzleLockPanel").hidden=!testing||!run?.pending;
+  $("puzzleMoveControls").hidden=!testing||(run?.pending!==null&&run?.pending!==undefined)||Boolean(run?.won);
+  $("puzzleLockPanel").hidden=!testing||(run?.pending===null||run?.pending===undefined);
   $("puzzleVictory").hidden=!testing||!run?.won;
   $("puzzleState").textContent=({build:"BUILD MODE",review:"TEACHER REVIEW",test:"TEST CHAMBER",play:"PLAYING LEVEL"})[mode];
   $("puzzleBoardLabel").textContent=testing?"YOUR ROUTE · USE ARROWS":mode==="review"?"TEACHER MAP INSPECTION":"MAP EDITOR · 8 × 6";
@@ -141,11 +148,47 @@ function renderMode(){
     $("puzzlePlayTitle").textContent=P.THEMES[board.theme].name;
     $("puzzleMoves").textContent=run.moves+" steps";
     $("puzzleUnlocked").textContent=run.unlocked.length+" locks opened";
+    $("puzzleMistakes").textContent=run.mistakes+" error"+(run.mistakes===1?"":"s");
     $("puzzleBackToEdit").textContent=review?"← Teacher review":"← Return to editor";
     $("puzzleBackToEdit").hidden=mode==="play"&&!review;
-    $("puzzleVictoryStats").textContent=run.won?"Solved in "+run.moves+" steps, with "+run.unlocked.length+" word lock"+(run.unlocked.length===1?"":"s")+" opened. This version can be remixed into another level.":"";
+    $("puzzleVictoryStats").textContent=run.won?(
+      (isHeist()?"Fragments secured. ":"")+run.moves+" moves · "+run.mistakes+" mistake"+(run.mistakes===1?"":"s")+
+      " · "+run.unlocked.length+" grammar locks. The theoretical shortest route is "+P.shortestRoute(board)+" moves."
+    ):"";
+    $("puzzleVictoryTitle").textContent=run.won?(isHeist()?rank(run):"You made it across!"):"You made it across!";
+    $("puzzleBestRun").textContent=run.won?bestRunText(run):"";
+    $("puzzlePlayBrief").textContent=isHeist()
+      ?"Intercepted transmission. Recover BOTH signal fragments, breach the grammar locks and escape. Purple portals can shorten the route—or send you backward. No timer; think through the map."
+      :"Find the exit. Use the arrow buttons or keyboard. Word locks ask language questions. Purple portals move you across the map.";
+  }
+  const hasFragments=isHeist();
+  $("puzzleObjective").hidden=!testing||!hasFragments;
+  if(hasFragments&&testing){
+    const a=run.collected.includes("X"),b=run.collected.includes("Y");
+    $("puzzleFragmentA").classList.toggle("secured",a);
+    $("puzzleFragmentB").classList.toggle("secured",b);
+    $("puzzleFragmentA").textContent=(a?"◆":"◇")+" SIGNAL A";
+    $("puzzleFragmentB").textContent=(b?"◆":"◇")+" SIGNAL B";
+    $("puzzleExtraction").textContent=a&&b?"EXTRACTION OPEN":"EXTRACTION SEALED";
+    $("puzzleExtraction").classList.toggle("secured",a&&b);
   }
   renderReview();
+}
+function isHeist(){return board.tiles.includes(P.FRAGMENT_A)&&board.tiles.includes(P.FRAGMENT_B);}
+function rank(r){
+ const slack=r.moves-P.shortestRoute(r.pack);
+ if(r.mistakes===0&&slack<=2)return "GHOST RUN · SIGNAL SECURED";
+ if(r.mistakes<=1&&slack<=6)return "CLEAN EXTRACTION";
+ return "MISSION COMPLETE · SIGNAL SECURED";
+}
+function bestRunText(r){
+ const key="puente.puzzle.best."+P.hash(r.pack),record={moves:r.moves,mistakes:r.mistakes},label=n=>n===1?"error":"errors";
+ try{
+   const old=JSON.parse(localStorage.getItem(key)||"null");
+   if(!old||r.mistakes<old.mistakes||(r.mistakes===old.mistakes&&r.moves<old.moves))localStorage.setItem(key,JSON.stringify(record));
+   const best=JSON.parse(localStorage.getItem(key));
+   return "PERSONAL BEST · "+best.moves+" moves · "+best.mistakes+" "+label(best.mistakes)+" · Saved only on this device.";
+ }catch{return "Try another route to beat your own score. No account or leaderboard required.";}
 }
 function renderReview(){
   const panel=$("puzzleTeacherReview");panel.hidden=!review;
@@ -174,7 +217,9 @@ function startRun(kind="test"){
   try{
     board=P.validate(board);
     run=P.newRun(board);mode=kind;render();
-    status(kind==="play"?"Find the exit. Solve language locks to open a route.":"Playtest started. Solve the entire level to prove it works.");
+    status(isHeist()
+      ?"OPERATION SIGNAL HEIST · Two fragments. Three mandatory grammar locks. The exit stays sealed until you recover both."
+      :kind==="play"?"Find the exit. Solve language locks to open a route.":"Playtest started. Solve the entire level to prove it works.");
   }catch(err){status("Not ready to play: "+err.message,true);}
 }
 function handleMove(dx,dy){
@@ -183,9 +228,11 @@ function handleMove(dx,dy){
     const result=P.move(run,dx,dy);
     if(result.type==="wall")status("A wall blocks this route. Try another direction.");
     else if(result.type==="question")status("A word lock blocks your path. Decode it to enter.");
-    else if(result.type==="portal")status("Portal jump! The matching gate transported you.");
-    else if(result.type==="move")status("Keep exploring. Find the exit.");
-    else if(result.type==="win"){status("Level solved! Your design has been playtested.");onWin();}
+    else if(result.type==="portal")status("PORTAL JUMP · You're on the other side of the map.");
+    else if(result.type==="fragment")status("SIGNAL "+result.fragment+" SECURED · "+result.remaining.length+" fragment"+(result.remaining.length===1?"":"s")+" remaining. Find extraction.");
+    else if(result.type==="sealed")status("EXTRACTION SEALED · Missing "+result.missing.join(" + ")+". Search the side routes before returning.",true);
+    else if(result.type==="move")status(isHeist()?"Decode the perimeter, collect both signals and reach extraction.":"Keep exploring. Find the exit.");
+    else if(result.type==="win"){status(isHeist()?"SIGNAL RECOVERED · Mission complete. Can you beat your route?":"Level solved! Your design has been playtested.");onWin();}
     render();
     if(result.type==="question")renderLock();
   }catch(err){status(err.message,true);}
@@ -206,7 +253,8 @@ function answerLock(i){
     const result=P.solve(run,i);
     if(result.type==="retry"){
       $("puzzleLockFeedback").textContent=result.message;
-      status("Not quite. Try reading the clue again.");
+      $("puzzleMistakes").textContent=run.mistakes+" error"+(run.mistakes===1?"":"s");
+      status("INTERCEPTION ERROR +1 · Re-read the clue, compare the verb forms, and try again.",true);
       return;
     }
     $("puzzleLockFeedback").textContent="";
@@ -260,6 +308,11 @@ function remix(){
     status("Remix started: this branch remembers its parent puzzle #"+board.parent+". Add a new route or word lock!");
   }catch(err){status(err.message,true);}
 }
+function startHeist(language="es"){
+  board=P.heist(language);run=null;mode="play";review=false;approvedView=false;
+  undo=[];redo=[];passedHash="";invalidateLink();
+  startRun("play");
+}
 function startDemo(){
   board=P.sample("es");run=null;mode="play";review=false;approvedView=false;
   undo=[];redo=[];passedHash="";invalidateLink();
@@ -293,6 +346,8 @@ function init(){
     if(!confirm("Start a blank map? Use Undo to restore the current design."))return;
     change(P.empty({language:board.language,theme:board.theme}),"Blank map. Place a start, exit, and word lock.");
   });
+  $("puzzleWarmup").addEventListener("click",startDemo);
+  $("puzzleHeist").addEventListener("click",()=>startHeist($("puzzleLanguage").value));
   $("puzzleTest").addEventListener("click",()=>startRun("test"));
   $("puzzleSave").addEventListener("click",()=>{
     try{shelfSave("draft",board);status("Saved unapproved draft on this browser. Export the link to preserve it elsewhere.");}
@@ -325,6 +380,7 @@ function init(){
   const params=new URL(root.location.href).searchParams;
   const draft=params.get("puzzleDraft"),player=params.get("puzzle");
   if(params.has("try")&&!draft&&!player)startDemo();
+  if(params.has("heist")&&!draft&&!player)startHeist();
   if(draft||player){
     try{
       board=P.decode(draft||player);
@@ -335,5 +391,5 @@ function init(){
   showTool(brush);renderShelf();render();
   // Page navigation to the workshop is handled by the main app after its tabs bind.
 }
-root.PuentePuzzleUI={init,remix,startDemo,openBuilder};
+root.PuentePuzzleUI={init,remix,startDemo,startHeist,openBuilder};
 })(window);
