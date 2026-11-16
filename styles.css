@@ -188,3 +188,6 @@ textarea{width:100%;min-width:0;padding:14px 15px;border:1px solid #c9d7d1;borde
 .puzzle-cell.collected{background:#1d6655;color:#e9fbca;border-color:#9dd4ab;box-shadow:inset 0 0 11px #194a39}
 .puzzle-best-run{font-family:ui-monospace,monospace;font-size:11px!important;font-weight:900;letter-spacing:.1px;color:#24644c!important}
 @media(max-width:640px){.mission-select{grid-template-columns:1fr;gap:8px}.mission-card{min-height:90px}.hero-challenge{margin-top:8px}.objective-fragment{font-size:11px;padding:9px 6px}}
+
+.puzzle-cell.is-lock{background:linear-gradient(135deg,#b38c4d,#8c6336);color:#fff7ce;border:2px solid #e5c27f;box-shadow:0 0 10px rgba(219,167,94,.3)}
+.puzzle-cell.is-lock.solved{background:#638d61;border-color:#bce4a1;color:#e8ffde}
