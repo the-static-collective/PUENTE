@@ -66,7 +66,10 @@ function review(key){
   const list=$("gardenQuestionReview");list.replaceChildren();
   card.pack.questions.forEach((q,i)=>{
     const row=node("article","","garden-question");
-    row.append(node("h4",(i+1)+". "+q.prompt),node("p",q.choices.map((x,j)=>String.fromCharCode(65+j)+". "+x).join("   ·   ")),node("p","Correct: "+q.choices[q.correct]+"  |  "+q.explanation,"key"));
+    row.append(node("h4",(i+1)+". "+q.prompt),
+      node("p","INTERACTION: "+(q.mechanic==="decode"?"Signal Tuner":q.mechanic==="trade"?"Map Navigator":q.mechanic==="repair"?"Word Weave / Repair":q.mechanic)),
+      node("p",q.choices.map((x,j)=>String.fromCharCode(65+j)+". "+x).join("   ·   ")),
+      node("p","Correct: "+q.choices[q.correct]+"  |  "+q.explanation,"key"));
     list.append(row);
   });
   $("gardenEditJson").value=JSON.stringify(card.pack,null,2);
@@ -107,7 +110,7 @@ function generate(receipt=null){
   try{
     const lib=G.load();
     const seed=Date.now()+lib.drafts.length*97+lib.approved.length*123;
-    const pack=G.derive({language:$("gardenLanguage").value,world:$("gardenWorld").value,focus:$("gardenFocus").value,seed,evidence:receipt||"Teacher-initiated recombination; not tested with students."});
+    const pack=G.derive({language:$("gardenLanguage").value,world:$("gardenWorld").value,focus:$("gardenFocus").value,mode:$("gardenMode").value,seed,evidence:receipt||"Teacher-initiated recombination; not tested with students."});
     const key=G.draft(pack,receipt||"New authored-bank combination — requires teacher review.");
     renderShelves();review(key);notice("Draft generated. Check all six answers before approving.");
     return key;
@@ -135,11 +138,16 @@ function track(s,role){
   if(!data.grown){
     const result=topFocus(Object.values(data.rounds));
     const worldCycle=["market","signal","clock","mystery","village"];
-    const world=worldCycle[(Math.max(0,Number(s.step))+G.load().approved.length)%worldCycle.length];
+    const ballot=window.PuenteAssembly.winner(s.design_counts);
+    const world=ballot.world||worldCycle[(Math.max(0,Number(s.step))+G.load().approved.length)%worldCycle.length];
+    const mode=ballot.mode||"mixed";
+    const note=(ballot.worldVotes||ballot.modeVotes)
+      ?" Voluntary classroom design votes: "+ballot.worldVotes+" world votes, "+ballot.modeVotes+" game votes. Winning proposal: "+(ballot.world||"no world preference")+" / "+(ballot.mode||"no mechanic preference")+". Teacher review required."
+      :" No design votes; world and mechanic selected exploratorily.";
     try{
       const lib=G.load();
-      const pack=G.derive({language:s.language,world,focus:result.focus,seed:Date.now()+lib.drafts.length*37,evidence:result.evidence});
-      const id=G.draft(pack,"Session-derived hypothesis. "+result.evidence);
+      const pack=G.derive({language:s.language,world,mode,focus:result.focus,seed:Date.now()+lib.drafts.length*37,evidence:result.evidence+note});
+      const id=G.draft(pack,"Session-derived hypothesis. "+result.evidence+note);
       data.grown=true;data.draftId=id;
       sessionStorage.setItem(key,JSON.stringify(data));
       renderShelves();
@@ -148,7 +156,7 @@ function track(s,role){
     }
   }
   $("classGrowth").hidden=false;
-  $("growthReceipt").textContent=data.grown?"Next adventure drafted from the class's aggregate round totals, without nicknames or individual answers. Review and approve before use.":"You finished! Open Quest Garden to create the next adventure.";
+  $("growthReceipt").textContent=data.grown?"Next adventure drafted from aggregate class results and optional design votes. No student identities copied. Teacher approval required.":"You finished! Open Quest Garden to create the next adventure.";
 }
 function init(){
   if(!G)throw Error("Quest Garden engine was not loaded.");
