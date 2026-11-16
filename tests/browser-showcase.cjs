@@ -92,6 +92,43 @@ async function main(){
     assert.match(await direct.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
     await directCtx.close();
 
+    // High-school path: no guessable A/B/C buttons for advanced grammar.
+    // Player must recover two fragments and type three phrases to get out.
+    const {ctx:heistCtx,page:heist}=await openPage(base+"/?heist=1","mobile");
+    await heist.locator("#workshopScreen").waitFor({state:"visible"});
+    assert.match(await heist.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
+    await heist.locator("#puzzleObjective").waitFor({state:"visible"});
+    assert.match(await heist.locator("#puzzleExtraction").innerText(),/SEALED/);
+    const press=async(direction,times=1)=>A(heist.locator('[data-move="'+direction+'"]'),times);
+    const cipher=async(answer)=>{
+      await heist.locator("#puzzleLockPanel").waitFor({state:"visible"});
+      await heist.locator(".cipher-entry").fill(answer);
+      await heist.locator(".cipher-submit").click();
+      await heist.locator("#puzzleLockPanel").waitFor({state:"hidden"});
+    };
+    await press("1,0");
+    await press("0,-1"); await cipher("se habian ido"); // accents optional
+    await press("0,-1"); // fragment X
+    assert.match(await heist.locator("#puzzleFragmentA").innerText(),/◆/);
+    await press("0,1",2);
+    await press("-1,0");
+    await press("0,1"); // portal P teleports to Q
+    await press("0,1");
+    await press("1,0"); await cipher("sepa"); // subjunctive
+    await press("0,1"); // fragment Y
+    assert.match(await heist.locator("#puzzleExtraction").innerText(),/OPEN/);
+    await press("0,-1");
+    await press("1,0");
+    await press("0,-1"); await cipher("por eso"); // causal connector
+    await press("0,-1"); // extraction
+    await heist.locator("#puzzleVictory").waitFor({state:"visible"});
+    assert.match(await heist.locator("#puzzleVictoryTitle").innerText(),/SIGNAL SECURED/);
+    assert.match(await heist.locator("#puzzleBestRun").innerText(),/PERSONAL BEST/);
+    const hardOverflow=await heist.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+    assert.ok(hardOverflow<=3,"Heist viewport overflowed by "+hardOverflow+" px.");
+    await heist.screenshot({path:path.join(root,"artifacts","heist-mobile.png"),fullPage:false});
+    await heistCtx.close();
+
     // The fallback is one physical HTML file and must run without a web server.
     const offlineURL="file://"+path.join(root,"showcase-offline.html");
     const {ctx:offlineCtx,page:offline}=await openPage(offlineURL,"mobile");
@@ -100,7 +137,7 @@ async function main(){
     await winFromStart(offline);
     await offlineCtx.close();
     if(errors.length)throw Error("Browser errors:\n"+errors.join("\n"));
-    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win; offline HTML plays without server.");
+    console.log("SHOWCASE SMOKE PASS: home → puzzle → win → remix → teacher draft → review → publish link → student win; offline HTML plays without server; high-school typed-grammar heist and fragment extraction work.");
   }finally{await browser.close();server.close();}
 }
 main().catch(err=>{console.error(err.stack||err);server.close();process.exitCode=1;});
