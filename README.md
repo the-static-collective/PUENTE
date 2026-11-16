@@ -19,6 +19,20 @@ Advanced grammar content is an **authored prototype**, not teacher-vetted course
 
 **Engineering:** `tests/puzzle-workshop.test.cjs` now tests item collection, mandatory grammar locks, sealed extraction, signed-free packet compatibility and remix lineage; `tests/browser-showcase.cjs` plays through the actual three-typed-answer heist in Chromium before publishing.
 
+## NOW SHOWING: RELAY PROTOCOL — a real bilingual logic game
+
+**Play:** https://puente.abundent.org/?protocol=RT&language=es (or press **Break the network** on the homepage).  
+**English variant:** https://puente.abundent.org/?protocol=RT&language=en  
+**Original maze workshop:** https://puente.abundent.org/?workshop=1
+
+The first classroom game was too close to a vocabulary quiz with a movement mechanic. PUENTE now puts a **deductive relay-control game** first. Players activate exactly three of six relay switches, physically route a signal from INPUT to OUTPUT, and interpret four or five conditionals written in Spanish or English. There is exactly one winning configuration. Wrong transmissions cost points; optional translation hints reduce a personal score, without preventing anyone from completing the game. Other students can generate safe new challenges using shareable seed codes.
+
+**No multiple-choice question is used in the Relay Protocol.** The student constructs a system state and tests an inference. Every generated challenge is verified for unique solvability and nonredundant logical clauses. This is an implementable algorithmic guarantee, not a claim of classroom efficacy.
+
+The first Spanish challenge uses the five-rule code **RT** (seed 1001). The original 60-second bridge and editable maze remain available as warm-up and level-building features, but are no longer the recommended first demonstration. Read the source-grounded [gameplay design receipt](docs/RELAY-GAME-DESIGN.md).
+
+The demo and challenge links require no account or database. The offline HTML includes the relay game. **Student accounts, school-grade teacher approval, learning outcomes, and actual student engagement have not been validated or implemented by this change.**
+
 ## NEW · Quest Garden v1 (MOTIF-inspired)
 
 **Play → Observe class-level results → Generate a candidate → Teacher review → Approve → Replay → Repeat.** Every completed teacher-led classroom session automatically drafts a new **six-challenge** adventure in the teacher's browser. It observes only counts per round and the challenge topic, not student names or individual answers. If too few responses exist, the candidate is explicitly marked exploratory.
