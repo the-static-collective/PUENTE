@@ -115,6 +115,40 @@ async function main(){
     assert.match(await direct.locator("#puzzleState").innerText(),/PLAYING LEVEL/);
     await directCtx.close();
 
+    // The first real user's complete loop: teacher tinkers, plays, saves,
+    // and creates a lesson to bring to an existing ChatGPT conversation.
+    const {ctx:teacherCtx,page:teacher}=await openPage(base+"/?studio=1","desktop");
+    await teacher.locator("#studioScreen").waitFor({state:"visible"});
+    assert.match(await teacher.locator("#studioHeading").innerText(),/Playroom/);
+    assert.equal(await teacher.locator("#studioRules li").count(),5);
+    await teacher.locator("#studioPeek").click();
+    await teacher.locator("#studioAnswer").waitFor({state:"visible"});
+    assert.match(await teacher.locator("#studioAnswerText").innerText(),/[A-F] \+ [A-F] \+ [A-F]/);
+    await teacher.locator("#studioRank").selectOption("starter");
+    assert.equal(await teacher.locator("#studioRules li").count(),4);
+    await teacher.locator("#studioScene").selectOption("town");
+    assert.match(await teacher.locator("#studioMissionName").innerText(),/Unnecessary Emergencies/);
+    await teacher.locator("#studioNotes").fill("Ask students to invent an if/then rule for a fictional relay.");
+    await teacher.locator("#studioKeep").click();
+    assert.match(await teacher.locator("#studioShelfCount").innerText(),/1 kept/);
+    assert.equal(await teacher.locator(".studio-saved-card").count(),1);
+    await teacher.locator("#studioPlay").click();
+    await teacher.locator("#protocolScreen").waitFor({state:"visible"});
+    assert.equal(await teacher.locator("#protocolRelays .protocol-node").count(),6);
+    const studioGame=await teacher.evaluate(()=>{
+      const p=window.PuenteProtocol;
+      return p.generate(p.codeTo(new URL(document.querySelector("#protocolShareLink").value).searchParams.get("protocol")),"es").solution;
+    });
+    for(let i=0;i<6;i++)if((studioGame>>i)&1)
+      await teacher.locator('#protocolRelays [data-relay="'+String.fromCharCode(65+i)+'"]').click();
+    await teacher.locator("#protocolPulse").click();
+    await teacher.locator("#protocolWin").waitFor({state:"visible"});
+    await teacher.locator('[data-screen="studio"]').click();
+    await teacher.locator("#studioScreen").waitFor({state:"visible"});
+    assert.match(await teacher.locator("#studioNotes").inputValue(),/fictional relay/);
+    await teacher.screenshot({path:path.join(root,"artifacts","teacher-playroom-desktop.png"),fullPage:false});
+    await teacherCtx.close();
+
     // High-school path: no guessable A/B/C buttons for advanced grammar.
     // Player must recover two fragments and type three phrases to get out.
     const {ctx:heistCtx,page:heist}=await openPage(base+"/?heist=1","mobile");
