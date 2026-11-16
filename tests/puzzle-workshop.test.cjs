@@ -20,7 +20,7 @@ const es=E.question(sample,sample.tiles.indexOf("a"));
 assert.equal(es.correct,0);assert.equal(es.choices.length,3);
 const en=E.sample("en");
 assert.ok(E.validate(en));assert.notDeepEqual(E.question(sample,"a").prompt,E.question(en,"a").prompt);
-assert.equal(E.PHRASES.es.length,10);assert.equal(E.PHRASES.en.length,10);
+assert.equal(E.PHRASES.es.length,20);assert.equal(E.PHRASES.en.length,20);
 const packet=E.encode(sample);
 assert.deepEqual(E.decode(packet),sample);
 assert.ok(packet.length<1400,"Packet must fit in a shareable URL");
