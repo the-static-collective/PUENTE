@@ -153,7 +153,7 @@ function renderMode(){
     $("puzzleBackToEdit").textContent=review?"← Teacher review":"← Return to editor";
     $("puzzleBackToEdit").hidden=mode==="play"&&!review;
     $("puzzleVictoryStats").textContent=run.won?(
-      (isHeist()?"Fragments secured. ":"")+run.moves+" moves · "+run.mistakes+" mistake"+(run.mistakes===1?"":"s")+
+      (isHeist()?"Fragments secured. ":"")+"Solved in "+run.moves+" steps · "+run.mistakes+" mistake"+(run.mistakes===1?"":"s")+
       " · "+run.unlocked.length+" grammar locks. The theoretical shortest route is "+P.shortestRoute(board)+" moves."
     ):"";
     $("puzzleVictoryTitle").textContent=run.won?(isHeist()?rank(run):"You made it across!"):"You made it across!";
