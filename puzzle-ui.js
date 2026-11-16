@@ -40,6 +40,7 @@ function writeShelf(items){
 function shelfSave(type,pack){
   const p=P.validate(pack),items=loadShelf(),id=P.hash(p),now=Date.now();
   const old=items.findIndex(x=>x.id===id);
+  if(old>=0&&items[old].type==="approved"&&type==="draft")return id;
   if(old>=0)items.splice(old,1);
   items.push({id,type,pack:p,at:now});
   writeShelf(items);renderShelf();return id;
@@ -100,7 +101,7 @@ function change(pack,message){
 }
 function paint(i){
   if(mode!=="build")return;
-  try{change(P.place(board,i,brush,{gate:Number($("puzzleClue").value)}),"Painted "+labelTile(board.tiles[i])[1]+".");}
+  try{const next=P.place(board,i,brush,{gate:Number($("puzzleClue").value)});change(next,"Placed "+labelTile(next.tiles[i])[1]+".");}
   catch(err){status(err.message,true);}
 }
 function gridCell(t,i){
@@ -245,7 +246,7 @@ function approve(){
   try{
     shelfSave("approved",board);makeLink("puzzle");
     status("Approved in this browser. Copy the player link and give it to classmates.");
-    review=false;approvedView=true;mode="review";render();$("puzzleTeacherReview").hidden=true;
+    review=false;approvedView=true;mode="build";run=null;render();
   }catch(err){status(err.message,true);}
 }
 function remix(){
