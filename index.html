@@ -4,27 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102b32">
-  <meta name="description" content="PUENTE — a cooperative bilingual classroom adventure. One room, two languages, many minds.">
-  <title>PUENTE • The Broken Bridge</title>
+  <meta name="description" content="Play a bilingual puzzle, build your own map, and remix other students’ levels. PUENTE turns language learning into a living classroom game.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PUENTE — Build worlds with words">
+  <meta property="og:description" content="Try a language puzzle in one click. Then build a level of your own. A living Spanish–English classroom game.">
+  <meta property="og:url" content="https://puente.abundent.org/">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://puente.abundent.org/">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <title>PUENTE — Play. Build. Remix.</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div class="shell">
     <header class="site-header">
       <a class="brand" href="./" aria-label="PUENTE home"><span class="brand-symbol" aria-hidden="true">≋</span><span><strong>PUENTE</strong><small>THE LIVING CLASSROOM</small></span></a>
-      <div class="header-right"><span class="badge">CHAPTER 004</span><span id="connectionBadge" class="status">LOCAL DEMO</span></div>
+      <div class="header-right"><span class="badge">PLAY • BUILD • REMIX</span><span id="connectionBadge" class="status">PLAYABLE DEMO</span></div>
     </header>
 
     <main>
       <section class="hero" aria-labelledby="headline">
         <div class="hero-copy">
-          <p class="eyebrow">THE BROKEN BRIDGE · EL PUENTE ROTO</p>
-          <h1 id="headline">A world rebuilt<br><em>one word</em> at a time.</h1>
-          <p class="hero-text">A shared bilingual adventure for real classrooms. Your teacher starts the story. The class solves it together.</p>
+          <p class="eyebrow">PUENTE · THE LIVING LANGUAGE GAME</p>
+          <h1 id="headline">Don't just learn<br>the words.<br><em>Build the world.</em></h1>
+          <p class="hero-text">Play a Spanish–English puzzle. Build your own level with walls, word locks and portals. Share it through a teacher, then let another student remix it.</p>
           <div class="hero-actions">
-            <button class="btn primary" id="goTeacher" type="button">I'm the teacher <span aria-hidden="true">→</span></button>
-            <button class="btn outlined" id="goStudent" type="button">Join a classroom</button>
+            <button class="btn primary btn-emphasis" id="goTryPuzzle" type="button">▶ Play a puzzle <span aria-hidden="true">→</span></button>
+            <button class="btn outlined" id="goBuildPuzzle" type="button">Build a level</button>
           </div>
+          <p class="hero-proof"><span aria-hidden="true">✦</span> Ready to try · No account · No setup · About a minute</p>
+          <button class="hero-text-link" id="goTeacher" type="button">Teacher? See your classroom tools →</button>
         </div>
         <div class="landscape" aria-label="Illustration: an unfinished bridge between two green hills">
           <div class="stars" aria-hidden="true">✳ &nbsp; ✶ &nbsp; ✳</div>
@@ -40,6 +49,15 @@
         </div>
       </section>
 
+      <section class="how-it-works" aria-label="How PUENTE grows">
+        <div><span class="how-number">01</span><strong>Play</strong><small>Solve a language lock</small></div>
+        <span class="how-arrow" aria-hidden="true">→</span>
+        <div><span class="how-number">02</span><strong>Build</strong><small>Make your own puzzle</small></div>
+        <span class="how-arrow" aria-hidden="true">→</span>
+        <div><span class="how-number">03</span><strong>Share</strong><small>Let a teacher review it</small></div>
+        <span class="how-arrow" aria-hidden="true">→</span>
+        <div><span class="how-number">04</span><strong>Remix</strong><small>Keep the games growing</small></div>
+      </section>
       <nav class="mode-nav" aria-label="Ways to play">
         <button class="mode active" type="button" data-screen="teacher" aria-pressed="true">01 / Teacher's desk</button>
         <button class="mode" type="button" data-screen="student" aria-pressed="false">02 / Student portal</button>
@@ -260,6 +278,7 @@
                   <button type="button" class="btn outlined small" id="puzzleBlank">New blank</button>
                 </div>
                 <p class="help">A valid puzzle needs exactly one start and exit, 1–4 language locks, an achievable route, and no way to bypass every language lock.</p>
+                <p class="help"><strong>First-time builder?</strong> Change a wall or add a lock in the example. Press Test my puzzle, solve it, then share the draft link.</p>
                 <button type="button" class="btn primary puzzle-wide" id="puzzleTest">▶ Test my puzzle</button>
                 <div class="action-row top-gap"><button type="button" class="btn outlined" id="puzzleSave">Save draft on this phone</button>
                   <button type="button" class="btn outlined" id="puzzleSubmit">Send to teacher →</button></div>
