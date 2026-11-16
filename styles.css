@@ -140,3 +140,21 @@ textarea{width:100%;min-width:0;padding:14px 15px;border:1px solid #c9d7d1;borde
 .puzzle-shelf-card .btn{min-height:40px;padding:7px 12px}
 @media(max-width:900px){.workshop-grid{grid-template-columns:1fr}.puzzle-grid{max-width:540px;margin:auto}.workshop-sidebar .field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.workshop-intro{flex-direction:column;align-items:flex-start}.puzzle-shelf{grid-template-columns:1fr}.workshop-sidebar .field-grid{grid-template-columns:1fr}.puzzle-tool{font-size:12px}.puzzle-cell{font-size:clamp(13px,5vw,26px)}}
+
+/* PUENTE first-showcase path — demonstrate the magic before the settings. */
+.hero{padding-top:49px;padding-bottom:35px}
+.hero .eyebrow{color:#187d68}
+.btn-emphasis{background:#116b61!important;box-shadow:0 6px 0 #aad2ae,0 12px 26px rgba(12,95,75,.14);font-size:16px;padding:14px 25px}
+.btn-emphasis:hover{background:#0e544e!important}
+.hero-proof{font-size:12px;font-weight:750;color:#46645a;margin:17px 0 8px}
+.hero-proof span{color:#b7814a;margin-right:4px}
+.hero-text-link{padding:11px 0 3px;background:transparent;border:0;color:#146960;font-size:13px;font-weight:850;text-decoration:underline;text-underline-offset:4px}
+.hero-text-link:hover{color:#0b4745}
+.how-it-works{display:grid;grid-template-columns:repeat(7,max-content);justify-content:space-between;gap:8px;padding:18px 24px;margin:0 0 15px;border:1px solid #c9dace;border-radius:16px;background:#eaf2e7}
+.how-it-works>div{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.how-number{font-family:ui-monospace,monospace;font-size:11px;font-weight:900;border:1px solid #a8c7b3;border-radius:6px;padding:3px 5px;color:#246b60;background:#fff}
+.how-it-works strong{font-size:13px;color:#204c44}
+.how-it-works small{font-size:11px;color:#536b66}
+.how-arrow{color:#6b9684;font-size:18px;align-self:center}
+@media(max-width:1050px){.how-it-works{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.how-it-works .how-arrow{display:none}.how-it-works>div{display:flex;flex-direction:column;align-items:flex-start;gap:3px;white-space:normal}}
+@media(max-width:640px){.hero{padding-top:26px}.hero h1{letter-spacing:-1.9px;font-size:clamp(36px,9vw,51px)}.hero-proof{line-height:1.5}.how-it-works{padding:15px;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.hero .hero-actions .btn{flex:1 1 155px}.hero-text-link{min-height:44px}}
