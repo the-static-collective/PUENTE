@@ -72,7 +72,7 @@ function verify(puzzle){
  if(!puzzle||puzzle.power!==POWER||!Array.isArray(puzzle.rules))throw Error("Invalid protocol.");
  return BASE.filter(mask=>puzzle.rules.every(rule=>matches(rule,mask)));
 }
-function generate(seed=2707,language="es"){
+function generate(seed=1001,language="es"){
  seed=seedValue(seed);
  if(language!=="es"&&language!=="en")throw Error("Choose Spanish or English.");
  const random=rng(seed),targets=shuffled(BASE,random);
@@ -130,7 +130,7 @@ function statement(rule,lang="es"){
  };
  return (lang==="en"?en:es)[rule.type]();
 }
-function begin(seed=2707,language="es"){
+function begin(seed=1001,language="es"){
  return {puzzle:generate(seed,language),mask:0,attempts:0,toggles:0,hints:[],solved:false,lastPulse:null};
 }
 function toggle(state,index){
